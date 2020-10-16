@@ -7,7 +7,7 @@ import (
 	"github.com/gorilla/mux"
 	"strconv"
 	"os"
-	"time"
+	//"time"
 	"io/ioutil"
 	"regexp"
 )
@@ -105,7 +105,14 @@ func getTitle(c chan string, threads int){
 	// Print the results
 	title := <- c
 	log.Println(title)
-	time.Sleep(1 * time.Second) // Waits for all channels to finish... bug!
+	title = <- c
+	log.Println(title)
+	title = <- c
+	log.Println(title)
+	title = <- c
+	log.Println(title)
+
+	log.Println("getTitle func exiting.")
 }
 
 // Get website and finds title
