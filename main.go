@@ -11,9 +11,9 @@ import (
 
 func main() {
 
-	//Channels for goroutines
-	/* chUrls := make(chan string)
-	chFinished := make(chan bool) */
+	//Make channels for Go Routines
+	myChannel := make(chan string)
+	defer close(myChannel)
 	/* log.Println("Channels for goroutines initilised.") */
 	startServer() 
 }
@@ -24,7 +24,7 @@ func startServer(){
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/api", topLevel)
 	router.HandleFunc("/api/{Id=threads}", getThreads)
-	log.Fatal(http.ListenAndServe(":8080", router))
+	log.Fatal(http.ListenAndServe(":8080", router))			//This loops forever, but is OK!
 }
 // Welcome displays splash screen
 func topLevel(w http.ResponseWriter, r *http.Request) {
@@ -67,5 +67,42 @@ func getURL(index int) string{
 func getTitle(threads int) []string{
 	titles := []string{}
 
+	// Go Routine concurrency logic goes her --------		:)
+	// Maybe change this to a loop rather than switch?
+	switch threads {
+	case 1:
+		fmt.Println("Im case 1.")
+		for i := 0; i<=4; i++{
+			go parseHTML(getURL(i))
+		}
+	case 2:
+		fmt.Println("Im case 2.")
+		for i := 0; i<=4; i=i+2{
+			go parseHTML(getURL(i))
+			go parseHTML(getURL(i+1))
+		}
+	case 3:
+		fmt.Println("Im case 3.")
+		for i := 0; i<=4; i=i+2{
+			go parseHTML(getURL(i))
+			go parseHTML(getURL(i+1))
+			go parseHTML(getURL(i+2))
+		}
+			go parseHTML(getURL(3))
+	case 4:
+		fmt.Println("Im case 4.")
+		go parseHTML(getURL(0))
+		go parseHTML(getURL(1))
+		go parseHTML(getURL(2))
+		go parseHTML(getURL(3))
+	}
 	
+	return titles
+}
+
+func parseHTML(URL string)string{
+	//Use some ReGex ro find <title> tag contense
+	title := ""
+	
+	return title
 }
