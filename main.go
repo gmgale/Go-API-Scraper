@@ -102,17 +102,26 @@ func getTitle(c chan string, threads int){
 		log.Fatal("Thread input error. Out of bounds.")
 	}
 
+	// Get titles from the above calls to parseHTML
+	var titles [] string
 	// Print the results
 	title := <- c
+	titles = append(titles, title)
 	log.Println(title)
 	title = <- c
+	titles = append(titles, title)
 	log.Println(title)
 	title = <- c
+	titles = append(titles, title)
 	log.Println(title)
 	title = <- c
+	titles = append(titles, title)
 	log.Println(title)
 
-	log.Println("getTitle func exiting.")
+	log.Println(titles)
+
+
+	log.Println("getTitle funcion exiting.")
 }
 
 // Get website and finds title

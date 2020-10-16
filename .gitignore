@@ -4,3 +4,4 @@ httpResponceStructure
 httpreqbackup.txt
 go.sum
 go.mod
+.vscode/settings.json
