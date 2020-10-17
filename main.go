@@ -9,6 +9,9 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"sync"
+
+	//"strings"
 
 	"github.com/gorilla/mux"
 )
@@ -59,6 +62,11 @@ func getThreads(w http.ResponseWriter, r *http.Request) {
 	// Retreive titles from pages
 	titles, succeeded, failed := getTitle(urlCh, statCh, intThreads)
 
+	// Split the title and print out
+	/* for i := 0; i <= len(titles); i++ {
+		x := strings.Split(titles[i], " ")
+		fmt.Fprintln(w, x)
+	} */
 	fmt.Fprintln(w, titles)
 	fmt.Fprintln(w, "The number of successful calls were: "+fmt.Sprintf("%d", succeeded)+".")
 	fmt.Fprintln(w, "The number of failed calls were: "+fmt.Sprintf("%d", failed)+".")
@@ -70,7 +78,21 @@ func getTitle(urlCh chan string, statCh chan string, threads int) ([]string, int
 
 	// Go Routine concurrency logic goes here
 	// Maybe change this to a loop rather than switch for worst case?
-	switch threads {
+	var wg sync.WaitGroup
+	wg.Add(threads)
+
+	//This only accounts for threads not total ammount of URLS, encap with another for loop??????????????????
+	for j := 0; j < threads; j++ {
+		go parseHTML(urlCh, statCh, getURL(j), &wg)
+		log.Println("Creating Go Routine " + fmt.Sprintf("%d", j))
+	}
+	log.Println("Go Routine loop finished. Waiting...")
+
+	wg.Wait()
+
+	log.Println("Waiting over")
+
+	/* switch threads {
 	case 1:
 		log.Println("Im case 1.")
 		for i := 0; i <= 3; i++ {
@@ -96,7 +118,7 @@ func getTitle(urlCh chan string, statCh chan string, threads int) ([]string, int
 		go parseHTML(urlCh, statCh, getURL(3))
 	default:
 		log.Fatal("Thread input error. Out of bounds.")
-	}
+	} */
 
 	// Get titles and status from the above calls to parseHTML from channels
 	var titles []string
@@ -123,7 +145,7 @@ func getTitle(urlCh chan string, statCh chan string, threads int) ([]string, int
 }
 
 // Get website and finds titleng(
-func parseHTML(urlCh chan string, statCh chan string, URL string) {
+func parseHTML(urlCh chan string, statCh chan string, URL string, wg *sync.WaitGroup) {
 	fmt.Println("Executing parseHTML.")
 
 	// Get the webpage--------------------------------
@@ -142,7 +164,7 @@ func parseHTML(urlCh chan string, statCh chan string, URL string) {
 	if err != nil {
 		panic(err)
 	}
-	// Store the HTML code as a string %s
+	// Store the HTML code as a string
 	text := string(html)
 
 	// Find the title ------------------------------------
@@ -156,6 +178,7 @@ func parseHTML(urlCh chan string, statCh chan string, URL string) {
 		urlCh <- element[1]
 		//fmt.Println(element[1])
 	}
+	wg.Done()
 	fmt.Println("Finished Executing parseHTML")
 }
 
