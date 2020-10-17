@@ -35,9 +35,11 @@ func topLevel(w http.ResponseWriter, r *http.Request) {
 func getThreads(w http.ResponseWriter, r *http.Request) {
 
 	// Make channels for Go Routines
-	// Make sure to "defer close(myChannel)" ---------
-	myChannel := make(chan string, 4)
-	defer close(myChannel)
+	// myChannel is return title data, statusChannel for GET url succ/fail count
+	urlCh := make(chan string, 4)
+	statCh := make(chan string, 4)
+	defer close(urlCh)
+	defer close(statCh)
 	log.Println("Channels for goroutines initilised.")
 
 	// Get threads from URL
@@ -55,66 +57,73 @@ func getThreads(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Retreive titles from pages
-	getTitle(myChannel, intThreads)
+	titles, succeeded, failed := getTitle(urlCh, statCh, intThreads)
+
+	fmt.Fprintln(w, titles)
+	fmt.Fprintln(w, "The number of successful calls were: "+fmt.Sprintf("%d", succeeded)+".")
+	fmt.Fprintln(w, "The number of failed calls were: "+fmt.Sprintf("%d", failed)+".")
+
 }
 
-// Hold URLS in function
-func getURL(index int) string {
-	urls := [4]string{
-		"https://www.result.si/projekti/",
-		"https://www.result.si/o-nas/",
-		"https://www.result.si/kariera/",
-		"https://www.result.si/blog/"}
-	return urls[index]
-}
+func getTitle(urlCh chan string, statCh chan string, threads int) ([]string, int, int) {
+	//url and status channel, threads. Returns titles, succesful calls and failed calls.
 
-func getTitle(c chan string, threads int) {
 	// Go Routine concurrency logic goes here
 	// Maybe change this to a loop rather than switch for worst case?
 	switch threads {
 	case 1:
 		log.Println("Im case 1.")
 		for i := 0; i <= 3; i++ {
-			parseHTML(c, getURL(i))
+			parseHTML(urlCh, statCh, getURL(i))
 		}
-	case 2: // This case crashes program??	:(
+	case 2:
 		log.Println("Im case 2.")
 		for i := 0; i < 2; i++ {
-			go parseHTML(c, getURL(2*i))
-			go parseHTML(c, getURL(2*i+1))
+			go parseHTML(urlCh, statCh, getURL(2*i))
+			go parseHTML(urlCh, statCh, getURL(2*i+1))
 		}
 	case 3:
 		log.Println("Im case 3.")
-		go parseHTML(c, getURL(0))
-		go parseHTML(c, getURL(1))
-		go parseHTML(c, getURL(2))
-		parseHTML(c, getURL(3))
+		go parseHTML(urlCh, statCh, getURL(0))
+		go parseHTML(urlCh, statCh, getURL(1))
+		go parseHTML(urlCh, statCh, getURL(2))
+		parseHTML(urlCh, statCh, getURL(3))
 	case 4:
 		log.Println("Im case 4.")
-		go parseHTML(c, getURL(0))
-		go parseHTML(c, getURL(1))
-		go parseHTML(c, getURL(2))
-		go parseHTML(c, getURL(3))
+		go parseHTML(urlCh, statCh, getURL(0))
+		go parseHTML(urlCh, statCh, getURL(1))
+		go parseHTML(urlCh, statCh, getURL(2))
+		go parseHTML(urlCh, statCh, getURL(3))
 	default:
 		log.Fatal("Thread input error. Out of bounds.")
 	}
 
-	// Get titles from the above calls to parseHTML from channels
+	// Get titles and status from the above calls to parseHTML from channels
 	var titles []string
+	failed := 0
+	succeeded := 0
 
 	for i := 0; i <= 3; i++ { // This will change to range of URLS length
-		title := <-c
+		title := <-urlCh
 		titles = append(titles, title)
 		log.Println("Title " + fmt.Sprintf("%d", i+1) + " is: " + title) //SprintF converts to string
+		status := <-statCh
+		if status == "succeeded" {
+			succeeded++
+		}
+		if status == "failed" {
+			failed++
+		}
 	}
 
 	log.Println(titles)
 
 	log.Println("getTitle funcion exiting.")
+	return titles, succeeded, failed
 }
 
 // Get website and finds titleng(
-func parseHTML(ch chan string, URL string) {
+func parseHTML(urlCh chan string, statCh chan string, URL string) {
 	fmt.Println("Executing parseHTML.")
 
 	// Get the webpage--------------------------------
@@ -122,8 +131,10 @@ func parseHTML(ch chan string, URL string) {
 	resp, err := http.Get(URL)
 	// Handle the error if there is one
 	if err != nil {
+		statCh <- "failed" //Pass back status for fail count
 		panic(err)
 	}
+	statCh <- "succeeded" //Pass back status for fail count
 	// Do this now so it won't be forgotten
 	defer resp.Body.Close()
 	// Reads html as a slice of bytes
@@ -142,8 +153,18 @@ func parseHTML(ch chan string, URL string) {
 	submatchall := re.FindAllStringSubmatch(text, -1)
 	for _, element := range submatchall {
 		// Pass into channel ch
-		ch <- element[1]
+		urlCh <- element[1]
 		//fmt.Println(element[1])
 	}
 	fmt.Println("Finished Executing parseHTML")
+}
+
+// Hold URLS in function
+func getURL(index int) string {
+	urls := [4]string{
+		"https://www.result.si/projekti/",
+		"https://www.result.si/o-nas/",
+		"https://www.result.si/kariera/",
+		"https://www.result.si/blog/"}
+	return urls[index]
 }
