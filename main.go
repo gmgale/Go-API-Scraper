@@ -78,47 +78,21 @@ func getTitle(urlCh chan string, statCh chan string, threads int) ([]string, int
 
 	// Go Routine concurrency logic goes here
 	// Maybe change this to a loop rather than switch for worst case?
-	var wg sync.WaitGroup
-	wg.Add(threads)
 
-	//This only accounts for threads not total ammount of URLS, encap with another for loop??????????????????
-	for j := 0; j < threads; j++ {
-		go parseHTML(urlCh, statCh, getURL(j), &wg)
-		log.Println("Creating Go Routine " + fmt.Sprintf("%d", j))
+	for i := 0; i < 3; i++ { //This should be len(urls)..... Bug
+		var wg sync.WaitGroup
+		wg.Add(threads)
+
+		for j := 0; j < threads; j++ {
+			go parseHTML(urlCh, statCh, getURL(j), &wg)
+			log.Println("Creating Go Routine " + fmt.Sprintf("%d", j)) // Not outputting all url titles? bug
+			i++                                                        //incriment URL counter
+		}
+		log.Println("Go Routine loop finished. Waiting...")
+
+		wg.Wait()
+		log.Println("Waiting over")
 	}
-	log.Println("Go Routine loop finished. Waiting...")
-
-	wg.Wait()
-
-	log.Println("Waiting over")
-
-	/* switch threads {
-	case 1:
-		log.Println("Im case 1.")
-		for i := 0; i <= 3; i++ {
-			parseHTML(urlCh, statCh, getURL(i))
-		}
-	case 2:
-		log.Println("Im case 2.")
-		for i := 0; i < 2; i++ {
-			go parseHTML(urlCh, statCh, getURL(2*i))
-			go parseHTML(urlCh, statCh, getURL(2*i+1))
-		}
-	case 3:
-		log.Println("Im case 3.")
-		go parseHTML(urlCh, statCh, getURL(0))
-		go parseHTML(urlCh, statCh, getURL(1))
-		go parseHTML(urlCh, statCh, getURL(2))
-		parseHTML(urlCh, statCh, getURL(3))
-	case 4:
-		log.Println("Im case 4.")
-		go parseHTML(urlCh, statCh, getURL(0))
-		go parseHTML(urlCh, statCh, getURL(1))
-		go parseHTML(urlCh, statCh, getURL(2))
-		go parseHTML(urlCh, statCh, getURL(3))
-	default:
-		log.Fatal("Thread input error. Out of bounds.")
-	} */
 
 	// Get titles and status from the above calls to parseHTML from channels
 	var titles []string
