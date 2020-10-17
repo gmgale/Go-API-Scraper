@@ -1,28 +1,29 @@
 package main
+
 // Enter url of "localhost:8080/api" to begin
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
-	"github.com/gorilla/mux"
-	"strconv"
 	"os"
-	//"time"
-	"io/ioutil"
 	"regexp"
+	"strconv"
+
+	"github.com/gorilla/mux"
 )
 
 func main() {
-	startServer() 
+	startServer()
 }
 
 // Set up a localhost server
-func startServer(){
+func startServer() {
 	log.Println("startServer funtion called.")
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/api", topLevel)
 	router.HandleFunc("/api/{Id=threads}", getThreads)
-	log.Fatal(http.ListenAndServe(":8080", router))	// This loops forever, but is OK... I think...
+	log.Fatal(http.ListenAndServe(":8080", router)) // This loops forever, but is OK... I think...
 }
 
 // Welcome displays splash screen at .../api
@@ -31,10 +32,10 @@ func topLevel(w http.ResponseWriter, r *http.Request) {
 }
 
 // API Threads Endpoint ---------------------------------------------------------
-func getThreads(w http.ResponseWriter, r *http.Request){
+func getThreads(w http.ResponseWriter, r *http.Request) {
 
 	// Make channels for Go Routines
-	// Make sure to "defer close(myChannel)" ---------		
+	// Make sure to "defer close(myChannel)" ---------
 	myChannel := make(chan string, 4)
 	defer close(myChannel)
 	log.Println("Channels for goroutines initilised.")
@@ -42,23 +43,23 @@ func getThreads(w http.ResponseWriter, r *http.Request){
 	// Get threads from URL
 	vars := mux.Vars(r)
 	threads := vars["Id=threads"]
-	fmt.Fprintln(w, "Threads: " + threads + ".\n")			// Browser print
-	log.Println("Threads set to: " + threads + ".")			// Console print
+	fmt.Fprintln(w, "Threads: "+threads+".\n")      // Browser print
+	log.Println("Threads set to: " + threads + ".") // Console print
 
 	// Convert threads string to int
 	intThreads, err := strconv.Atoi(threads)
-    if err != nil {
-        // Handle error
-        fmt.Println(err)
-        os.Exit(2)
-	}	
+	if err != nil {
+		// Handle error
+		fmt.Println(err)
+		os.Exit(2)
+	}
 
 	// Retreive titles from pages
 	getTitle(myChannel, intThreads)
 }
 
 // Hold URLS in function
-func getURL(index int) string{
+func getURL(index int) string {
 	urls := [4]string{
 		"https://www.result.si/projekti/",
 		"https://www.result.si/o-nas/",
@@ -67,31 +68,27 @@ func getURL(index int) string{
 	return urls[index]
 }
 
-func getTitle(c chan string, threads int){
+func getTitle(c chan string, threads int) {
 	// Go Routine concurrency logic goes here
 	// Maybe change this to a loop rather than switch for worst case?
 	switch threads {
 	case 1:
 		log.Println("Im case 1.")
-		for i := 0; i<=3; i++{
+		for i := 0; i <= 3; i++ {
 			parseHTML(c, getURL(i))
 		}
-	case 2:								// This case crashes program??	:(
+	case 2: // This case crashes program??	:(
 		log.Println("Im case 2.")
-		for i := 0; i<=2; i++{
-			go parseHTML(c, getURL(0))
-			go parseHTML(c, getURL(1))
-		}
-		for i := 0; i<2; i++{
-			go parseHTML(c, getURL(2))
-			go parseHTML(c, getURL(3))
+		for i := 0; i < 2; i++ {
+			go parseHTML(c, getURL(2*i))
+			go parseHTML(c, getURL(2*i+1))
 		}
 	case 3:
 		log.Println("Im case 3.")
-			go parseHTML(c, getURL(0))
-			go parseHTML(c, getURL(1))
-			go parseHTML(c, getURL(2))
-			parseHTML(c, getURL(3))
+		go parseHTML(c, getURL(0))
+		go parseHTML(c, getURL(1))
+		go parseHTML(c, getURL(2))
+		parseHTML(c, getURL(3))
 	case 4:
 		log.Println("Im case 4.")
 		go parseHTML(c, getURL(0))
@@ -102,32 +99,24 @@ func getTitle(c chan string, threads int){
 		log.Fatal("Thread input error. Out of bounds.")
 	}
 
-	// Get titles from the above calls to parseHTML
-	var titles [] string
-	// Print the results
-	title := <- c
-	titles = append(titles, title)
-	log.Println(title)
-	title = <- c
-	titles = append(titles, title)
-	log.Println(title)
-	title = <- c
-	titles = append(titles, title)
-	log.Println(title)
-	title = <- c
-	titles = append(titles, title)
-	log.Println(title)
+	// Get titles from the above calls to parseHTML from channels
+	var titles []string
+
+	for i := 0; i <= 3; i++ { // This will change to range of URLS length
+		title := <-c
+		titles = append(titles, title)
+		log.Println("Title " + fmt.Sprintf("%d", i+1) + " is: " + title) //SprintF converts to string
+	}
 
 	log.Println(titles)
-
 
 	log.Println("getTitle funcion exiting.")
 }
 
-// Get website and finds title
-func parseHTML(ch chan string, URL string){
+// Get website and finds titleng(
+func parseHTML(ch chan string, URL string) {
 	fmt.Println("Executing parseHTML.")
-	
+
 	// Get the webpage--------------------------------
 
 	resp, err := http.Get(URL)
