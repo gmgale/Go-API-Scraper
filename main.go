@@ -1,6 +1,5 @@
 package main
 
-// Enter url of "localhost:8080/api" to begin
 import (
 	"fmt"
 	"io/ioutil"
@@ -10,9 +9,6 @@ import (
 	"regexp"
 	"strconv"
 	"sync"
-
-	//"strings"
-
 	"github.com/gorilla/mux"
 )
 
@@ -26,7 +22,7 @@ func startServer() {
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/api", topLevel)
 	router.HandleFunc("/api/{Id=threads}", getThreads)
-	log.Fatal(http.ListenAndServe(":8080", router)) // This loops forever, but is OK... I think...
+	log.Fatal(http.ListenAndServe(":8080", router))
 }
 
 // Welcome displays splash screen at .../api
@@ -38,18 +34,17 @@ func topLevel(w http.ResponseWriter, r *http.Request) {
 func getThreads(w http.ResponseWriter, r *http.Request) {
 
 	// Make channels for Go Routines
-	// myChannel is return title data, statusChannel for GET url succ/fail count
+	// urlChannel is for title data
+	// statChannel is for GET url succ/fail count
 	urlCh := make(chan string, 4)
 	statCh := make(chan string, 4)
 	defer close(urlCh)
 	defer close(statCh)
-	//log.Println("Channels for goroutines initilised.")
 
 	// Get threads from URL
 	vars := mux.Vars(r)
 	threads := vars["Id=threads"]
-	fmt.Fprintln(w, "Threads: "+threads+".\n")      // Browser print
-	log.Println("Threads set to: " + threads + ".") // Console print
+	fmt.Fprintln(w, "Threads: "+threads+".\n") // Browser print
 
 	// Convert threads string to int
 	intThreads, err := strconv.Atoi(threads)
@@ -62,63 +57,56 @@ func getThreads(w http.ResponseWriter, r *http.Request) {
 	// Retreive titles from pages
 	titles, succeeded, failed := getTitle(urlCh, statCh, intThreads)
 
-	// Split the title and print out
-	/* for i := 0; i <= len(titles); i++ {
-		x := strings.Split(titles[i], " ")
-		fmt.Fprintln(w, x)
-	} */
-	fmt.Fprintln(w, titles)
-	fmt.Fprintln(w, "The number of successful calls were: "+fmt.Sprintf("%d", succeeded)+".")
+	// Print the titles
+	fmt.Fprintln(w, fmt.Sprintf("%d", len(titles))+" titles were found:\n")
+	for i := 0; i < len(titles); i++ {
+		fmt.Fprintln(w, titles[i])
+	}
+	fmt.Fprintln(w, "\nThe number of successful calls were: "+fmt.Sprintf("%d", succeeded)+".")
 	fmt.Fprintln(w, "The number of failed calls were: "+fmt.Sprintf("%d", failed)+".")
-
-	log.Println("getThreads func Exiting...")
-
 }
 
 func getTitle(urlCh chan string, statCh chan string, threads int) ([]string, int, int) {
 	//URL and status channels, threads. Returns: titles, succesful calls and failed calls.
-	url := 4
-	quotient := url / threads
-	remainder := url % threads
 
-	var wgq sync.WaitGroup
-	//wgq.Add(quotient)
+	urls := [4]string{
+		"https://www.result.si/projekti/",
+		"https://www.result.si/o-nas/",
+		"https://www.result.si/kariera/",
+		"https://www.result.si/blog/"}
+
+	quotient := len(urls) / threads
+	remainder := len(urls) % threads
+	var wg sync.WaitGroup
 
 	for i := 0; i < quotient; i++ {
-		log.Println("i = " + fmt.Sprintf("%d", i))
-		wgq.Add(threads)
+		wg.Add(threads)
 		for j := 0; j < threads; j++ {
-			log.Println("j = " + fmt.Sprintf("%d", j))
 			log.Println("Fetching title from URL " + fmt.Sprintf("%d", threads*i+j))
-			go parseHTML(urlCh, statCh, getURL(threads*i+j), &wgq)
+			go parseHTML(urlCh, statCh, urls[threads*i+j], &wg)
 		}
-		wgq.Wait()
+		wg.Wait()
 	}
-	log.Println("Waiting wg q1")
-	wgq.Wait()
-	log.Println("Waiting wg q1 over")
+	wg.Wait()
+
 	if remainder != 0 {
-		log.Println("Remainder is " + fmt.Sprintf("%d", remainder))
-		wgq.Add(remainder)
+		wg.Add(remainder)
 		for k := 0; k < remainder; k++ {
-			log.Println("k = " + fmt.Sprintf("%d", threads*quotient+k))
 			log.Println("Fetching title from URL " + fmt.Sprintf("%d", threads*quotient+k))
-			go parseHTML(urlCh, statCh, getURL(threads*quotient+k), &wgq)
+			go parseHTML(urlCh, statCh, urls[threads*quotient+k], &wg)
 		}
 	}
-	log.Println("Waiting wg q2")
-	wgq.Wait()
-	log.Println("Waiting wg q2 over")
+	wg.Wait()
 
 	// Get titles and status from the above calls to parseHTML from channels
 	var titles []string
 	failed := 0
 	succeeded := 0
 
-	for i := 0; i <= 3; i++ { // This will change to range of URLS length
+	for i := 0; i < len(urls)-1; i++ { // This will change to range of URLS length
 		title := <-urlCh
 		titles = append(titles, title)
-		log.Println("Title " + fmt.Sprintf("%d", i+1) + " is: " + title) //SprintF converts to string
+
 		status := <-statCh
 		if status == "succeeded" {
 			succeeded++
@@ -128,14 +116,12 @@ func getTitle(urlCh chan string, statCh chan string, threads int) ([]string, int
 		}
 	}
 
-	log.Println(titles)
-
-	log.Println("getTitle funcion exiting.")
+	fmt.Println("getTitle funcion exiting.")
 	return titles, succeeded, failed
 }
 
-// Get website and finds titleng(
-func parseHTML(urlCh chan string, statCh chan string, URL string, wgq *sync.WaitGroup) {
+// Fetches website and finds title
+func parseHTML(urlCh chan string, statCh chan string, URL string, wg *sync.WaitGroup) {
 	fmt.Println("Executing parseHTML on " + URL)
 
 	// Get the webpage--------------------------------
@@ -149,7 +135,7 @@ func parseHTML(urlCh chan string, statCh chan string, URL string, wgq *sync.Wait
 	}
 	statCh <- "succeeded" //Pass back status for fail count
 	log.Println("Successfully fetched page " + URL)
-	// Do this now so it won't be forgotten
+
 	defer resp.Body.Close()
 	// Reads html as a slice of bytes
 	html, err := ioutil.ReadAll(resp.Body)
@@ -157,7 +143,6 @@ func parseHTML(urlCh chan string, statCh chan string, URL string, wgq *sync.Wait
 		log.Println("Error converting HTML to String for page " + URL)
 		panic(err)
 	}
-	log.Println("Converted HTML to string for " + URL)
 
 	// Store the HTML code as a string
 	text := string(html)
@@ -173,16 +158,7 @@ func parseHTML(urlCh chan string, statCh chan string, URL string, wgq *sync.Wait
 		urlCh <- element[1]
 		fmt.Println(element[1])
 	}
-	wgq.Done()
-	fmt.Println("Finished Executing parseHTML on " + URL)
-}
 
-// Hold URLS in function
-func getURL(index int) string {
-	urls := [4]string{
-		"https://www.result.si/projekti/",
-		"https://www.result.si/o-nas/",
-		"https://www.result.si/kariera/",
-		"https://www.result.si/blog/"}
-	return urls[index]
+	wg.Done()
+	fmt.Println("Finished Executing parseHTML on " + URL)
 }
