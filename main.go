@@ -43,7 +43,7 @@ func getThreads(w http.ResponseWriter, r *http.Request) {
 	statCh := make(chan string, 4)
 	defer close(urlCh)
 	defer close(statCh)
-	log.Println("Channels for goroutines initilised.")
+	//log.Println("Channels for goroutines initilised.")
 
 	// Get threads from URL
 	vars := mux.Vars(r)
@@ -71,28 +71,44 @@ func getThreads(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "The number of successful calls were: "+fmt.Sprintf("%d", succeeded)+".")
 	fmt.Fprintln(w, "The number of failed calls were: "+fmt.Sprintf("%d", failed)+".")
 
+	log.Println("getThreads func Exiting...")
+
 }
 
 func getTitle(urlCh chan string, statCh chan string, threads int) ([]string, int, int) {
-	//url and status channel, threads. Returns titles, succesful calls and failed calls.
+	//URL and status channels, threads. Returns: titles, succesful calls and failed calls.
+	url := 4
+	quotient := url / threads
+	remainder := url % threads
 
-	// Go Routine concurrency logic goes here
-	// Maybe change this to a loop rather than switch for worst case?
+	var wgq sync.WaitGroup
+	//wgq.Add(quotient)
 
-	for i := 0; i < 3; i++ { //This should be len(urls)..... Bug
-		var wg sync.WaitGroup
-		wg.Add(threads)
-
+	for i := 0; i < quotient; i++ {
+		log.Println("i = " + fmt.Sprintf("%d", i))
+		wgq.Add(threads)
 		for j := 0; j < threads; j++ {
-			go parseHTML(urlCh, statCh, getURL(j), &wg)
-			log.Println("Creating Go Routine " + fmt.Sprintf("%d", j)) // Not outputting all url titles? bug
-			i++                                                        //incriment URL counter
+			log.Println("j = " + fmt.Sprintf("%d", j))
+			log.Println("Fetching title from URL " + fmt.Sprintf("%d", threads*i+j))
+			go parseHTML(urlCh, statCh, getURL(threads*i+j), &wgq)
 		}
-		log.Println("Go Routine loop finished. Waiting...")
-
-		wg.Wait()
-		log.Println("Waiting over")
+		wgq.Wait()
 	}
+	log.Println("Waiting wg q1")
+	wgq.Wait()
+	log.Println("Waiting wg q1 over")
+	if remainder != 0 {
+		log.Println("Remainder is " + fmt.Sprintf("%d", remainder))
+		wgq.Add(remainder)
+		for k := 0; k < remainder; k++ {
+			log.Println("k = " + fmt.Sprintf("%d", threads*quotient+k))
+			log.Println("Fetching title from URL " + fmt.Sprintf("%d", threads*quotient+k))
+			go parseHTML(urlCh, statCh, getURL(threads*quotient+k), &wgq)
+		}
+	}
+	log.Println("Waiting wg q2")
+	wgq.Wait()
+	log.Println("Waiting wg q2 over")
 
 	// Get titles and status from the above calls to parseHTML from channels
 	var titles []string
@@ -119,25 +135,30 @@ func getTitle(urlCh chan string, statCh chan string, threads int) ([]string, int
 }
 
 // Get website and finds titleng(
-func parseHTML(urlCh chan string, statCh chan string, URL string, wg *sync.WaitGroup) {
-	fmt.Println("Executing parseHTML.")
+func parseHTML(urlCh chan string, statCh chan string, URL string, wgq *sync.WaitGroup) {
+	fmt.Println("Executing parseHTML on " + URL)
 
 	// Get the webpage--------------------------------
 
 	resp, err := http.Get(URL)
 	// Handle the error if there is one
 	if err != nil {
+		log.Println("Error fetching page " + URL)
 		statCh <- "failed" //Pass back status for fail count
 		panic(err)
 	}
 	statCh <- "succeeded" //Pass back status for fail count
+	log.Println("Successfully fetched page " + URL)
 	// Do this now so it won't be forgotten
 	defer resp.Body.Close()
 	// Reads html as a slice of bytes
 	html, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
+		log.Println("Error converting HTML to String for page " + URL)
 		panic(err)
 	}
+	log.Println("Converted HTML to string for " + URL)
+
 	// Store the HTML code as a string
 	text := string(html)
 
@@ -150,10 +171,10 @@ func parseHTML(urlCh chan string, statCh chan string, URL string, wg *sync.WaitG
 	for _, element := range submatchall {
 		// Pass into channel ch
 		urlCh <- element[1]
-		//fmt.Println(element[1])
+		fmt.Println(element[1])
 	}
-	wg.Done()
-	fmt.Println("Finished Executing parseHTML")
+	wgq.Done()
+	fmt.Println("Finished Executing parseHTML on " + URL)
 }
 
 // Hold URLS in function
