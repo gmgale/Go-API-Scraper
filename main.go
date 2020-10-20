@@ -1,18 +1,3 @@
-//	Package Scrape Title Data API
-//
-//	Documentation for Scrape Title API
-//
-//	Schemes: http
-//	BasePath: /
-//	Version: 1.0.0
-//
-//	Consumes:
-//		-None
-//	Produces:
-//		-HTML
-//
-//	swagger:meta
-
 package main
 
 import (
@@ -42,12 +27,17 @@ func startServer() {
 
 // Welcome displays splash screen at .../api
 func topLevel(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "text/plain")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.WriteHeader(http.StatusOK)
+	
 	fmt.Fprintln(w, "Welcome!\n\nAppend'/x' to the URL (where x is a number 1-4), to enable concurrent threads/goroutines.")
 }
 
 // API Threads Endpoint ---------------------------------------------------------
 func getThreads(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Content-Type", "html")
+	w.Header().Add("Content-Type", "text/plain")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
 
 	urls := []string{
@@ -87,12 +77,14 @@ func getThreads(w http.ResponseWriter, r *http.Request) {
 	titles, succeeded, failed := getTitle(urlCh, statCh, intThreads, urls)
 
 	// Print the titles
-	fmt.Fprintln(w, fmt.Sprintf("%d", len(titles))+" titles were found:\n")
+	fmt.Fprintln(w, fmt.Sprintf("%d", succeeded)+" titles were found:\n")
 	for i := 0; i < len(titles); i++ {
 		fmt.Fprintln(w, titles[i])
 	}
 	fmt.Fprintln(w, "\nThe number of successful calls were: "+fmt.Sprintf("%d", succeeded)+".")
 	fmt.Fprintln(w, "The number of failed calls were: "+fmt.Sprintf("%d", failed)+".")
+
+	return
 }
 
 func getTitle(urlCh chan string, statCh chan string, threads int, urls []string) ([]string, int, int) {
@@ -128,8 +120,9 @@ func getTitle(urlCh chan string, statCh chan string, threads int, urls []string)
 
 	for i := 0; i < len(urls); i++ {
 		title := <-urlCh
-		titles = append(titles, title)
-
+		if title != "" {
+			titles = append(titles, title)
+		}
 		status := <-statCh
 		if status == "succeeded" {
 			succeeded++
@@ -154,8 +147,11 @@ func parseHTML(urlCh chan string, statCh chan string, URL string, wg *sync.WaitG
 	if err != nil {
 		log.Println("Error fetching page " + URL)
 		statCh <- "failed" //Pass back status for fail count
-		panic(err)
+		urlCh <- ""
+		wg.Done()
+		return
 	}
+
 	statCh <- "succeeded" //Pass back status for fail count
 	log.Println("Successfully fetched page " + URL)
 
@@ -164,7 +160,10 @@ func parseHTML(urlCh chan string, statCh chan string, URL string, wg *sync.WaitG
 	html, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Println("Error converting HTML to String for page " + URL)
-		panic(err)
+		urlCh <- ""
+		statCh <- "failed" //Pass back status for fail count
+		wg.Done()
+		return
 	}
 
 	// Store the HTML code as a string
@@ -184,4 +183,5 @@ func parseHTML(urlCh chan string, statCh chan string, URL string, wg *sync.WaitG
 
 	wg.Done()
 	fmt.Println("Finished Executing parseHTML on " + URL)
+	return
 }

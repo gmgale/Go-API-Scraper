@@ -9,9 +9,13 @@ info:
 servers:
   - url: http://localhost:8080/
     
-  
-
 paths:
+  "/api":
+    get:
+      summary: Splash screen with basic API instructions.
+      responses:
+          '200':
+            description: Responded OK - 200
   "/api/{Id=threads}":
     get:
       summary: Prints titles of web pages to screen.
@@ -20,10 +24,11 @@ paths:
         - name: Id=threads
           in: path
           required: true
-          description: Number of web scraping Go Routines to run concurrenty.
+          description: Number of web scraping Go Routines to run concurrently. Cannot exceed number of URLS.
           schema:
             type : integer
+          
       responses: 
         '200':
-          description: OK 1234
-                      
+          description: Responded OK - 200
+          
