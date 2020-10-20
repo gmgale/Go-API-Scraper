@@ -170,7 +170,6 @@ func parseHTML(urlCh chan string, statCh chan string, URL string, wg *sync.WaitG
 	text := string(html)
 
 	// Find the title ------------------------------------
-
 	// RegEx for finding text between <title></title> tags
 	re := regexp.MustCompile(`<title.*?>(.*)</title>`)
 
