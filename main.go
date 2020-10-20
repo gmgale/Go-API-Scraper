@@ -1,3 +1,20 @@
+//	Package Scrape Title Data API
+//
+//	Documentation for Scrape Title API
+//
+//	Schemes: http
+//	BasePath: /
+//	Version: 1.0.0
+//
+//	Consumes:
+//		-None
+//	Produces:
+//		-HTML
+//
+//	swagger:meta
+
+
+
 package main
 
 import (
@@ -5,7 +22,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"regexp"
 	"strconv"
 	"sync"
@@ -33,6 +49,12 @@ func topLevel(w http.ResponseWriter, r *http.Request) {
 // API Threads Endpoint ---------------------------------------------------------
 func getThreads(w http.ResponseWriter, r *http.Request) {
 
+	urls := []string{
+		"https://www.result.si/projekti/",
+		"https://www.result.si/o-nas/",
+		"https://www.result.si/kariera/",
+		"https://www.result.si/blog/"}
+
 	// Make channels for Go Routines
 	// urlChannel is for title data
 	// statChannel is for GET url succ/fail count
@@ -44,18 +66,24 @@ func getThreads(w http.ResponseWriter, r *http.Request) {
 	// Get threads from URL
 	vars := mux.Vars(r)
 	threads := vars["Id=threads"]
-	fmt.Fprintln(w, "Threads: "+threads+".\n") // Browser print
 
 	// Convert threads string to int
 	intThreads, err := strconv.Atoi(threads)
 	if err != nil {
 		// Handle error
-		fmt.Println(err)
-		os.Exit(2)
+		fmt.Fprintln(w, "Invalid input (" +threads+").")
+		return
 	}
 
+	if intThreads > len(urls){
+	fmt.Fprintln(w, "Threads ("+ threads +") exceedes number of URLS ("+ fmt.Sprintf("%d",len(urls)) +").\n") 
+		return
+	}
+
+	fmt.Fprintln(w, "Threads: "+threads+".\n") // Browser print
+
 	// Retreive titles from pages
-	titles, succeeded, failed := getTitle(urlCh, statCh, intThreads)
+	titles, succeeded, failed := getTitle(urlCh, statCh, intThreads, urls)
 
 	// Print the titles
 	fmt.Fprintln(w, fmt.Sprintf("%d", len(titles))+" titles were found:\n")
@@ -66,14 +94,8 @@ func getThreads(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "The number of failed calls were: "+fmt.Sprintf("%d", failed)+".")
 }
 
-func getTitle(urlCh chan string, statCh chan string, threads int) ([]string, int, int) {
+func getTitle(urlCh chan string, statCh chan string, threads int, urls []string) ([]string, int, int) {
 	//URL and status channels, threads. Returns: titles, succesful calls and failed calls.
-
-	urls := [4]string{
-		"https://www.result.si/projekti/",
-		"https://www.result.si/o-nas/",
-		"https://www.result.si/kariera/",
-		"https://www.result.si/blog/"}
 
 	quotient := len(urls) / threads
 	remainder := len(urls) % threads
@@ -103,7 +125,7 @@ func getTitle(urlCh chan string, statCh chan string, threads int) ([]string, int
 	failed := 0
 	succeeded := 0
 
-	for i := 0; i < len(urls)-1; i++ { // This will change to range of URLS length
+	for i := 0; i < len(urls); i++ { 
 		title := <-urlCh
 		titles = append(titles, title)
 
