@@ -13,8 +13,6 @@
 //
 //	swagger:meta
 
-
-
 package main
 
 import (
@@ -25,6 +23,7 @@ import (
 	"regexp"
 	"strconv"
 	"sync"
+
 	"github.com/gorilla/mux"
 )
 
@@ -48,6 +47,8 @@ func topLevel(w http.ResponseWriter, r *http.Request) {
 
 // API Threads Endpoint ---------------------------------------------------------
 func getThreads(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "html")
+	w.WriteHeader(http.StatusOK)
 
 	urls := []string{
 		"https://www.result.si/projekti/",
@@ -71,12 +72,12 @@ func getThreads(w http.ResponseWriter, r *http.Request) {
 	intThreads, err := strconv.Atoi(threads)
 	if err != nil {
 		// Handle error
-		fmt.Fprintln(w, "Invalid input (" +threads+").")
+		fmt.Fprintln(w, "Invalid input ("+threads+").")
 		return
 	}
 
-	if intThreads > len(urls){
-	fmt.Fprintln(w, "Threads ("+ threads +") exceedes number of URLS ("+ fmt.Sprintf("%d",len(urls)) +").\n") 
+	if intThreads > len(urls) {
+		fmt.Fprintln(w, "Threads ("+threads+") exceedes number of URLS ("+fmt.Sprintf("%d", len(urls))+").\n")
 		return
 	}
 
@@ -125,7 +126,7 @@ func getTitle(urlCh chan string, statCh chan string, threads int, urls []string)
 	failed := 0
 	succeeded := 0
 
-	for i := 0; i < len(urls); i++ { 
+	for i := 0; i < len(urls); i++ {
 		title := <-urlCh
 		titles = append(titles, title)
 

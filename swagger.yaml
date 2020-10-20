@@ -6,9 +6,13 @@ info:
   contact:
     name: George Gale
     email: gmgale@icloud.com
+servers:
+  - url: http://localhost:8080/
+    
+  
 
 paths:
-  "/url/{Id=threds}":
+  "/api/{Id=threads}":
     get:
       summary: Prints titles of web pages to screen.
       description: User defined threds/Go Routines as argument.
@@ -19,8 +23,7 @@ paths:
           description: Number of web scraping Go Routines to run concurrenty.
           schema:
             type : integer
-            format: int32
-            minimum: 1
       responses: 
         '200':
-          description: OK
+          description: OK 1234
+                      
