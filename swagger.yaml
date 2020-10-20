@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Go Scraping API
-  description: An API for scraping web titles using multiple goroutines
+  description: A web API for scraping web titles using concurrent Goroutines
   version: 1.0.0
   contact:
     name: George Gale
@@ -19,12 +19,12 @@ paths:
   "/api/{Id=threads}":
     get:
       summary: Prints titles of web pages to screen.
-      description: User defined threds/Go Routines as argument.
+      description: User defined threds/Goroutines as argument.
       parameters:
         - name: Id=threads
           in: path
           required: true
-          description: Number of web scraping Go Routines to run concurrently. Cannot exceed number of URLS.
+          description: Number of web scraping Goroutines to run concurrently. Cannot exceed number of URLS.
           schema:
             type : integer
           

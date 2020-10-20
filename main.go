@@ -30,8 +30,8 @@ func topLevel(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "text/plain")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
-	
-	fmt.Fprintln(w, "Welcome!\n\nAppend'/x' to the URL (where x is a number 1-4), to enable concurrent threads/goroutines.")
+
+	fmt.Fprintln(w, "Welcome!\n\nAppend'/x' to the URL (where x is a number 1-4), to enable concurrent threads/Goroutines.")
 }
 
 // API Threads Endpoint ---------------------------------------------------------
@@ -46,7 +46,7 @@ func getThreads(w http.ResponseWriter, r *http.Request) {
 		"https://www.result.si/kariera/",
 		"https://www.result.si/blog/"}
 
-	// Make channels for Go Routines
+	// Make channels for Goroutines
 	// urlChannel is for title data
 	// statChannel is for GET url succ/fail count
 	urlCh := make(chan string, 4)
