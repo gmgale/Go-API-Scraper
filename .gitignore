@@ -6,3 +6,6 @@ go.sum
 go.mod
 .vscode/settings.json
 Workspace1.code-workspace
+dockerfile
+docker-compose.yml
+__debug_bin
