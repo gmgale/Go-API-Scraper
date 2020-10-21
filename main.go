@@ -65,6 +65,10 @@ func getThreads(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "Invalid input ("+threads+").")
 		return
 	}
+	if intThreads == 0 {
+		fmt.Fprintln(w, "Threads cannot be 0")
+		return
+	}
 
 	if intThreads > len(urls) {
 		fmt.Fprintln(w, "Threads ("+threads+") exceedes number of URLS ("+fmt.Sprintf("%d", len(urls))+").\n")
