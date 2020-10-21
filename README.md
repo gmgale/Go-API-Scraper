@@ -1,6 +1,9 @@
 Goscraperapi implements the RESTful endpoint API, which makes concurrent calls to the following websites:
 
-https://www.result.si/projekti/ https://www.result.si/o-nas/ https://www.result.si/kariera/ https://www.result.si/blog/
+https://www.result.si/projekti/ 
+https://www.result.si/o-nas/
+https://www.result.si/kariera/ 
+https://www.result.si/blog/
 
 The input data for the endpoint is integer, which represents the number of threads/Goroutins to the above web pages (min 1 represents all consecutive calls, max 4 represents all concurrent calls).
 
