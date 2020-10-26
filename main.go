@@ -156,9 +156,6 @@ func parseHTML(urlCh chan string, statCh chan string, URL string, wg *sync.WaitG
 		return
 	}
 
-	statCh <- "succeeded" //Pass back status for fail count
-	log.Println("Successfully fetched page " + URL)
-
 	defer resp.Body.Close()
 	// Reads html as a slice of bytes
 	html, err := ioutil.ReadAll(resp.Body)
@@ -169,6 +166,9 @@ func parseHTML(urlCh chan string, statCh chan string, URL string, wg *sync.WaitG
 		wg.Done()
 		return
 	}
+
+	statCh <- "succeeded" //Pass back status for success count
+	log.Println("Successfully fetched page " + URL)
 
 	// Store the HTML code as a string
 	text := string(html)
