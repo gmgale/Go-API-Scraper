@@ -12,6 +12,11 @@ import (
 	"github.com/gorilla/mux"
 )
 
+const (
+	statusSucceeded = "succeeded"
+	statusFailed    = "failed"
+)
+
 func main() {
 	startServer()
 }
@@ -138,10 +143,10 @@ func getTitle(urlCh chan string, statCh chan string, threads int, urls []string)
 			titles = append(titles, title)
 		}
 		status := <-statCh
-		if status == "succeeded" {
+		if status == statusSucceeded {
 			succeeded++
 		}
-		if status == "failed" {
+		if status == statusFailed {
 			failed++
 		}
 	}
@@ -159,7 +164,7 @@ func parseHTML(urlCh chan string, statCh chan string, URL string, wg *sync.WaitG
 
 	if err != nil {
 		log.Println("Error fetching page " + URL)
-		statCh <- "failed"
+		statCh <- statusFailed
 		urlCh <- ""
 		wg.Done()
 		return
@@ -171,12 +176,12 @@ func parseHTML(urlCh chan string, statCh chan string, URL string, wg *sync.WaitG
 	if err != nil {
 		log.Println("Error converting HTML to String for page " + URL)
 		urlCh <- ""
-		statCh <- "failed"
+		statCh <- statusFailed
 		wg.Done()
 		return
 	}
 
-	statCh <- "succeeded"
+	statCh <- statusSucceeded
 	log.Println("Successfully fetched page " + URL)
 
 	text := string(html)
