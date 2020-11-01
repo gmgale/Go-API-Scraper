@@ -97,9 +97,6 @@ func getTitle(threads int) ([]string, [2]int) {
 	// titles is a list of titles extracted from urls from function parseHTML.
 	var titles []string
 
-	failed := 0
-	succeeded := 0
-
 	// urlCh is for title data.
 	urlCh := make(chan string)
 	defer close(urlCh)
@@ -110,6 +107,8 @@ func getTitle(threads int) ([]string, [2]int) {
 
 	quotient := len(urls) / threads
 	remainder := len(urls) % threads
+	succeeded := 0
+	failed := 0
 	var wg sync.WaitGroup
 
 	for i := 0; i < quotient; i++ {
