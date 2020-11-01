@@ -100,12 +100,18 @@ func getTitle(threads int, urls []string) ([]string, int, int) {
 
 	//Threads. Returns: titles, succesful calls and failed calls. ***
 
+	// titles is a list of titles extracted from urls from function parseHTML.
+	var titles []string
+
+	failed := 0
+	succeeded := 0
+
 	// urlChannel is for title data.
-	urlCh := make(chan string, 4)
+	urlCh := make(chan string)
 	defer close(urlCh)
 
 	// statChannel is for GET url succ/fail count.
-	statCh := make(chan string, 4)
+	statCh := make(chan string)
 	defer close(statCh)
 
 	quotient := len(urls) / threads
@@ -117,6 +123,19 @@ func getTitle(threads int, urls []string) ([]string, int, int) {
 		for j := 0; j < threads; j++ {
 			log.Println("Fetching title from URL " + fmt.Sprintf("%d", threads*i+j))
 			go parseHTML(urlCh, statCh, urls[threads*i+j], &wg)
+			select {
+			case status := <-statCh:
+				if status == statusSucceeded {
+					succeeded++
+				}
+				if status == statusFailed {
+					failed++
+				}
+			}
+			title := <-urlCh
+			if title != "" {
+				titles = append(titles, title)
+			}
 		}
 		wg.Wait()
 	}
@@ -127,29 +146,22 @@ func getTitle(threads int, urls []string) ([]string, int, int) {
 		for k := 0; k < remainder; k++ {
 			log.Println("Fetching title from URL " + fmt.Sprintf("%d", threads*quotient+k))
 			go parseHTML(urlCh, statCh, urls[threads*quotient+k], &wg)
+			select {
+			case status := <-statCh:
+				if status == statusSucceeded {
+					succeeded++
+				}
+				if status == statusFailed {
+					failed++
+				}
+			}
+			title := <-urlCh
+			if title != "" {
+				titles = append(titles, title)
+			}
 		}
 	}
 	wg.Wait()
-
-	// titles is a list of titles extracted from urls from function parseHTML.
-	var titles []string
-
-	failed := 0
-	succeeded := 0
-
-	for i := 0; i < len(urls); i++ {
-		title := <-urlCh
-		if title != "" {
-			titles = append(titles, title)
-		}
-		status := <-statCh
-		if status == statusSucceeded {
-			succeeded++
-		}
-		if status == statusFailed {
-			failed++
-		}
-	}
 
 	fmt.Println("getTitle funcion exiting.")
 	return titles, succeeded, failed
@@ -180,7 +192,7 @@ func parseHTML(urlCh chan string, statCh chan string, URL string, wg *sync.WaitG
 		wg.Done()
 		return
 	}
-
+	log.Println("1")
 	statCh <- statusSucceeded
 	log.Println("Successfully fetched page " + URL)
 
