@@ -54,14 +54,6 @@ func getThreads(w http.ResponseWriter, r *http.Request) {
 		"https://www.result.si/blog/",
 	}
 
-	// urlChannel is for title data.
-	urlCh := make(chan string, 4)
-	defer close(urlCh)
-
-	// statChannel is for GET url succ/fail count.
-	statCh := make(chan string, 4)
-	defer close(statCh)
-
 	// vars is a call to the mux router to recive the varibles from the http request.
 	vars := mux.Vars(r)
 
@@ -87,7 +79,7 @@ func getThreads(w http.ResponseWriter, r *http.Request) {
 
 	// Retreive titles and calls from pages ***
 
-	titles, succeeded, failed := getTitle(urlCh, statCh, intThreads, urls)
+	titles, succeeded, failed := getTitle(intThreads, urls)
 
 	// Print the titles	***
 
@@ -104,9 +96,17 @@ func getThreads(w http.ResponseWriter, r *http.Request) {
 // sucessful and failed calls.
 // It will process in concurrent batches of "threads" number of Goroutines,
 // then any remaining urls will be processed concurrently.
-func getTitle(urlCh chan string, statCh chan string, threads int, urls []string) ([]string, int, int) {
+func getTitle(threads int, urls []string) ([]string, int, int) {
 
-	//URL and status channels, threads. Returns: titles, succesful calls and failed calls. ***
+	//Threads. Returns: titles, succesful calls and failed calls. ***
+
+	// urlChannel is for title data.
+	urlCh := make(chan string, 4)
+	defer close(urlCh)
+
+	// statChannel is for GET url succ/fail count.
+	statCh := make(chan string, 4)
+	defer close(statCh)
 
 	quotient := len(urls) / threads
 	remainder := len(urls) % threads
