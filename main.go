@@ -17,6 +17,14 @@ const (
 	statusFailed    = "failed"
 )
 
+// urls is a list of web addresses that will be processed.
+var urls = [...]string{
+	"https://www.result.si/projekti/",
+	"https://www.result.si/o-nas/",
+	"https://www.result.si/kariera/",
+	"https://www.result.si/blog/",
+}
+
 func main() {
 	startServer()
 }
@@ -46,14 +54,6 @@ func getThreads(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
 
-	// urls is a list of web addresses that will be processed.
-	urls := []string{
-		"https://www.result.si/projekti/",
-		"https://www.result.si/o-nas/",
-		"https://www.result.si/kariera/",
-		"https://www.result.si/blog/",
-	}
-
 	// vars is a call to the mux router to recive the varibles from the http request.
 	vars := mux.Vars(r)
 
@@ -77,28 +77,22 @@ func getThreads(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprintln(w, "Threads: "+threads+".\n")
 
-	// Retreive titles and calls from pages ***
+	titles, status := getTitle(intThreads)
 
-	titles, succeeded, failed := getTitle(intThreads, urls)
-
-	// Print the titles	***
-
-	fmt.Fprintln(w, fmt.Sprintf("%d", succeeded)+" titles were found:\n")
+	fmt.Fprintln(w, fmt.Sprintf("%d", status[0])+" titles were found:\n")
 	for i := 0; i < len(titles); i++ {
 		fmt.Fprintln(w, titles[i])
 	}
-	fmt.Fprintln(w, "\nThe number of successful calls were: "+fmt.Sprintf("%d", succeeded)+".")
-	fmt.Fprintln(w, "The number of failed calls were: "+fmt.Sprintf("%d", failed)+".")
+	fmt.Fprintln(w, "\nThe number of successful calls were: "+fmt.Sprintf("%d", status[0])+".")
+	fmt.Fprintln(w, "The number of failed calls were: "+fmt.Sprintf("%d", status[1])+".")
 	return
 }
 
-// getTitle is a function that returns titles from urls,
-// sucessful and failed calls.
+// getTitle is a function that returns an array of titles from urls
+// and an array of sucessful and failed calls.
 // It will process in concurrent batches of "threads" number of Goroutines,
 // then any remaining urls will be processed concurrently.
-func getTitle(threads int, urls []string) ([]string, int, int) {
-
-	//Threads. Returns: titles, succesful calls and failed calls. ***
+func getTitle(threads int) ([]string, [2]int) {
 
 	// titles is a list of titles extracted from urls from function parseHTML.
 	var titles []string
@@ -106,11 +100,11 @@ func getTitle(threads int, urls []string) ([]string, int, int) {
 	failed := 0
 	succeeded := 0
 
-	// urlChannel is for title data.
+	// urlCh is for title data.
 	urlCh := make(chan string)
 	defer close(urlCh)
 
-	// statChannel is for GET url succ/fail count.
+	// statCh is for GET url succ/fail counter.
 	statCh := make(chan string)
 	defer close(statCh)
 
@@ -164,7 +158,11 @@ func getTitle(threads int, urls []string) ([]string, int, int) {
 	wg.Wait()
 
 	fmt.Println("getTitle funcion exiting.")
-	return titles, succeeded, failed
+
+	var statusArr [2]int
+	statusArr[0] = succeeded
+	statusArr[1] = failed
+	return titles, statusArr
 }
 
 // parseHTML is a function that extracts a title from a URL.
@@ -192,7 +190,7 @@ func parseHTML(urlCh chan string, statCh chan string, URL string, wg *sync.WaitG
 		wg.Done()
 		return
 	}
-	log.Println("1")
+
 	statCh <- statusSucceeded
 	log.Println("Successfully fetched page " + URL)
 
