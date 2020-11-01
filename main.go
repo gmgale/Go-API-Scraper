@@ -16,7 +16,8 @@ func main() {
 	startServer()
 }
 
-// Set up a localhost server
+// startServer sets up a localhost server using the gorilla/mux package
+// and calls handlers for endpoints.
 func startServer() {
 	log.Println("startServer funtion called.")
 	router := mux.NewRouter().StrictSlash(true)
@@ -25,7 +26,7 @@ func startServer() {
 	log.Fatal(http.ListenAndServe(":8080", router))
 }
 
-// Welcome displays splash screen at .../api
+// topLevel is a handler for displaying the welcome screen.
 func topLevel(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "text/plain")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -34,34 +35,37 @@ func topLevel(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Welcome!\n\nAppend'/x' to the URL (where x is a number 1-4), to enable concurrent threads/Goroutines.")
 }
 
-// API Threads Endpoint ---------------------------------------------------------
+// getThreads is a handler for reciving user input from the URL.
 func getThreads(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "text/plain")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
 
+	// urls is a list of web addresses that will be processed.
 	urls := []string{
 		"https://www.result.si/projekti/",
 		"https://www.result.si/o-nas/",
 		"https://www.result.si/kariera/",
-		"https://www.result.si/blog/"}
+		"https://www.result.si/blog/",
+	}
 
-	// Make channels for Goroutines
-	// urlChannel is for title data
-	// statChannel is for GET url succ/fail count
+	// urlChannel is for title data.
 	urlCh := make(chan string, 4)
-	statCh := make(chan string, 4)
 	defer close(urlCh)
+
+	// statChannel is for GET url succ/fail count.
+	statCh := make(chan string, 4)
 	defer close(statCh)
 
-	// Get threads from URL
+	// vars is a call to the mux router to recive the varibles from the http request.
 	vars := mux.Vars(r)
+
+	// threads is a string from the list of varibles provided by mux.Vars.
 	threads := vars["Id=threads"]
 
-	// Convert threads string to int
+	// intThreads is the varible "threads" converted fromstring to int.
 	intThreads, err := strconv.Atoi(threads)
 	if err != nil {
-		// Handle error
 		fmt.Fprintln(w, "Invalid input ("+threads+").")
 		return
 	}
@@ -69,30 +73,35 @@ func getThreads(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "Threads cannot be 0")
 		return
 	}
-
 	if intThreads > len(urls) {
 		fmt.Fprintln(w, "Threads ("+threads+") exceedes number of URLS ("+fmt.Sprintf("%d", len(urls))+").\n")
 		return
 	}
 
-	fmt.Fprintln(w, "Threads: "+threads+".\n") // Browser print
+	fmt.Fprintln(w, "Threads: "+threads+".\n")
 
-	// Retreive titles from pages
+	// Retreive titles and calls from pages ***
+
 	titles, succeeded, failed := getTitle(urlCh, statCh, intThreads, urls)
 
-	// Print the titles
+	// Print the titles	***
+
 	fmt.Fprintln(w, fmt.Sprintf("%d", succeeded)+" titles were found:\n")
 	for i := 0; i < len(titles); i++ {
 		fmt.Fprintln(w, titles[i])
 	}
 	fmt.Fprintln(w, "\nThe number of successful calls were: "+fmt.Sprintf("%d", succeeded)+".")
 	fmt.Fprintln(w, "The number of failed calls were: "+fmt.Sprintf("%d", failed)+".")
-
 	return
 }
 
+// getTitle is a function that returns titles from urls,
+// sucessful and failed calls.
+// It will process in concurrent batches of "threads" number of Goroutines,
+// then any remaining urls will be processed concurrently.
 func getTitle(urlCh chan string, statCh chan string, threads int, urls []string) ([]string, int, int) {
-	//URL and status channels, threads. Returns: titles, succesful calls and failed calls.
+
+	//URL and status channels, threads. Returns: titles, succesful calls and failed calls. ***
 
 	quotient := len(urls) / threads
 	remainder := len(urls) % threads
@@ -117,8 +126,9 @@ func getTitle(urlCh chan string, statCh chan string, threads int, urls []string)
 	}
 	wg.Wait()
 
-	// Get titles and status from the above calls to parseHTML from channels
+	// titles is a list of titles extracted from urls from function parseHTML.
 	var titles []string
+
 	failed := 0
 	succeeded := 0
 
@@ -140,46 +150,42 @@ func getTitle(urlCh chan string, statCh chan string, threads int, urls []string)
 	return titles, succeeded, failed
 }
 
-// Fetches website and finds title
+// parseHTML is a function that extracts a title from a URL.
+// It then uses go channels to send a success/fail varible and the title.
 func parseHTML(urlCh chan string, statCh chan string, URL string, wg *sync.WaitGroup) {
 	fmt.Println("Executing parseHTML on " + URL)
 
-	// Get the webpage--------------------------------
-
 	resp, err := http.Get(URL)
-	// Handle the error if there is one
+
 	if err != nil {
 		log.Println("Error fetching page " + URL)
-		statCh <- "failed" //Pass back status for fail count
+		statCh <- "failed"
 		urlCh <- ""
 		wg.Done()
 		return
 	}
 
 	defer resp.Body.Close()
-	// Reads html as a slice of bytes
+
 	html, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Println("Error converting HTML to String for page " + URL)
 		urlCh <- ""
-		statCh <- "failed" //Pass back status for fail count
+		statCh <- "failed"
 		wg.Done()
 		return
 	}
 
-	statCh <- "succeeded" //Pass back status for success count
+	statCh <- "succeeded"
 	log.Println("Successfully fetched page " + URL)
 
-	// Store the HTML code as a string
 	text := string(html)
 
-	// Find the title ------------------------------------
-	// RegEx for finding text between <title></title> tags
+	//re is the regular expression for finding the title in the string of HTML.
 	re := regexp.MustCompile(`<title.*?>(.*)</title>`)
 
 	submatchall := re.FindAllStringSubmatch(text, -1)
 	for _, element := range submatchall {
-		// Pass into channel ch
 		urlCh <- element[1]
 		fmt.Println(element[1])
 	}
