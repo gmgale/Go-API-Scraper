@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"sync"
 )
 
 // getTitle is a function that returns an array of titles from urls
@@ -15,25 +14,16 @@ func getTitle(threads int) ([]string, [2]int) {
 	// titles is a list of titles extracted from urls from function parseHTML.
 	var titles []string
 
-	// urlCh is for title data.
-	urlCh := make(chan string)
-	defer close(urlCh)
-
-	// statCh is for GET url succ/fail counter.
-	statCh := make(chan string)
-	defer close(statCh)
-
 	quotient := len(urls) / threads
 	remainder := len(urls) % threads
 	succeeded := 0
 	failed := 0
-	var wg sync.WaitGroup
 
 	for i := 0; i < quotient; i++ {
 		wg.Add(threads)
 		for j := 0; j < threads; j++ {
 			log.Println("Fetching title from URL " + fmt.Sprintf("%d", threads*i+j))
-			go parseHTML(urlCh, statCh, urls[threads*i+j], &wg)
+			go parseHTML(urls[threads*i+j])
 			select {
 			case status := <-statCh:
 				if status == statusSucceeded {
@@ -56,7 +46,7 @@ func getTitle(threads int) ([]string, [2]int) {
 		wg.Add(remainder)
 		for k := 0; k < remainder; k++ {
 			log.Println("Fetching title from URL " + fmt.Sprintf("%d", threads*quotient+k))
-			go parseHTML(urlCh, statCh, urls[threads*quotient+k], &wg)
+			go parseHTML(urls[threads*quotient+k])
 			select {
 			case status := <-statCh:
 				if status == statusSucceeded {

@@ -6,12 +6,11 @@ import (
 	"log"
 	"net/http"
 	"regexp"
-	"sync"
 )
 
 // parseHTML is a function that extracts a title from a URL.
-// It then uses go channels to send a success/fail varible and the title.
-func parseHTML(urlCh chan string, statCh chan string, URL string, wg *sync.WaitGroup) {
+// It then uses go channels to send a success/fail variable and the title.
+func parseHTML(URL string) {
 	fmt.Println("Executing parseHTML on " + URL)
 
 	resp, err := http.Get(URL)
