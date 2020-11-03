@@ -1,5 +1,9 @@
 package main
 
+import (
+	"flag"
+)
+
 const (
 	statusSucceeded = "succeeded"
 	statusFailed    = "failed"
@@ -14,6 +18,8 @@ var urls = [...]string{
 }
 
 func main() {
+
+	flag.Parse()
 
 	startServer()
 

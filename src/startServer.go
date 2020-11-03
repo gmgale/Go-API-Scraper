@@ -14,5 +14,5 @@ func startServer() {
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/api", topLevel)
 	router.HandleFunc("/api/{Id=threads}", getThreads)
-	log.Fatal(http.ListenAndServe(":8080", router))
+	log.Fatal(http.ListenAndServe(port, router))
 }
