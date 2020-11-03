@@ -46,13 +46,13 @@ func getThreads(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprintln(w, "Threads: "+threads+".\n")
 
-	titles, status := getTitle(intThreads)
+	titleData := getTitle(intThreads)
 
-	fmt.Fprintln(w, fmt.Sprintf("%d", status[0])+" titles were found:\n")
-	for i := 0; i < len(titles); i++ {
-		fmt.Fprintln(w, titles[i])
+	fmt.Fprintln(w, fmt.Sprintf("%d", titleData.status.success)+" titles were found:\n")
+	for i := 0; i < len(titleData.titles); i++ {
+		fmt.Fprintln(w, titleData.titles[i])
 	}
-	fmt.Fprintln(w, "\nThe number of successful calls were: "+fmt.Sprintf("%d", status[0])+".")
-	fmt.Fprintln(w, "The number of failed calls were: "+fmt.Sprintf("%d", status[1])+".")
+	fmt.Fprintln(w, "\nThe number of successful calls were: "+fmt.Sprintf("%d", titleData.status.success)+".")
+	fmt.Fprintln(w, "The number of failed calls were: "+fmt.Sprintf("%d", titleData.status.fail)+".")
 	return
 }

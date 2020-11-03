@@ -6,18 +6,18 @@ import "testing"
 // threads from 1 to len(urls) and comfirm correct number of status (succeed/fail)
 // calls count is returned.
 func TestGetTitleStatusCount(t *testing.T) {
-	for i := 1; i <= len(urls); i++ {
-		threads := i
+	threads := 1
 
-		// Arrange
-		_, status := getTitle(threads)
+	// Arrange
+	titleData := getTitle(threads)
+	statusSuccess := titleData.status.success
+	statusFail := titleData.status.fail
 
-		// Act
-		if (status[0] + status[1]) != len(urls) {
+	// Act
+	if (statusSuccess + statusFail) != len(urls) {
 
-			// Assert
-			t.Errorf("%d succeeded and %d failed responces returned totaling %d, expected a total of %d.",
-				status[0], status[1], (status[0] + status[1]), len(urls))
-		}
+		// Assert
+		t.Errorf("%d succeeded and %d failed responces returned totaling %d, expected a total of %d.",
+			statusSuccess, statusFail, (statusSuccess + statusFail), len(urls))
 	}
 }

@@ -9,15 +9,14 @@ import (
 // and an array of sucessful and failed calls.
 // It will process in concurrent batches of "threads" number of Goroutines,
 // then any remaining urls will be processed concurrently.
-func getTitle(threads int) ([]string, [2]int) {
+func getTitle(threads int) titleDataStr {
 
-	// titles is a list of titles extracted from urls from function parseHTML.
-	var titles []string
+	// titleData is a struct to hold an array of titles (string)
+	// and a struct of status sucess/fail counts (int)
+	titleData := titleDataStr{}
 
 	quotient := len(urls) / threads
 	remainder := len(urls) % threads
-	succeeded := 0
-	failed := 0
 
 	for i := 0; i < quotient; i++ {
 		wg.Add(threads)
@@ -27,15 +26,15 @@ func getTitle(threads int) ([]string, [2]int) {
 			select {
 			case status := <-statCh:
 				if status == statusSucceeded {
-					succeeded++
+					titleData.status.success++
 				}
 				if status == statusFailed {
-					failed++
+					titleData.status.fail++
 				}
 			}
-			title := <-urlCh
-			if title != "" {
-				titles = append(titles, title)
+			newTitle := <-urlCh
+			if newTitle != "" {
+				titleData.titles = append(titleData.titles, newTitle)
 			}
 		}
 		wg.Wait()
@@ -50,15 +49,15 @@ func getTitle(threads int) ([]string, [2]int) {
 			select {
 			case status := <-statCh:
 				if status == statusSucceeded {
-					succeeded++
+					titleData.status.success++
 				}
 				if status == statusFailed {
-					failed++
+					titleData.status.fail++
 				}
 			}
-			title := <-urlCh
-			if title != "" {
-				titles = append(titles, title)
+			newTitle := <-urlCh
+			if newTitle != "" {
+				titleData.titles = append(titleData.titles, newTitle)
 			}
 		}
 	}
@@ -66,8 +65,5 @@ func getTitle(threads int) ([]string, [2]int) {
 
 	fmt.Println("getTitle funcion exiting.")
 
-	var statusArr [2]int
-	statusArr[0] = succeeded
-	statusArr[1] = failed
-	return titles, statusArr
+	return titleData
 }
