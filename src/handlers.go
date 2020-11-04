@@ -59,7 +59,6 @@ func getThreads(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-//
 func (s *myServer) shutdownHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Shutdown server"))
 

@@ -2,11 +2,12 @@ package main
 
 import (
 	"context"
-	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"syscall"
 	"time"
+
+	"github.com/gorilla/mux"
 
 	"os"
 	"os/signal"
@@ -30,7 +31,7 @@ func newServer() *myServer {
 	// Register handlers
 	router.HandleFunc("/api", topLevel)
 	router.HandleFunc("/api/{Id=threads}", getThreads)
-	router.HandleFunc("/api/shutdown", s.shutdownHandler)
+	router.HandleFunc("/shutdown", s.shutdownHandler)
 
 	// Set http server handler
 	s.Handler = router
