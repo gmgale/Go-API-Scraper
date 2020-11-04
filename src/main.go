@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"log"
 )
 
 const (
@@ -21,7 +22,21 @@ func main() {
 
 	flag.Parse()
 
-	startServer()
+	server := newServer()
+
+	done := make(chan bool)
+	go func() {
+		err := server.ListenAndServe()
+		if err != nil {
+			log.Printf("Listen and serve: %v", err)
+		}
+		done <- true
+	}()
+
+	server.waitShutdown()
+
+	<-done
+	log.Printf("DONE!")
 
 	closeChannels()
 }

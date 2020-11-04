@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
+	"sync/atomic"
 
 	"github.com/gorilla/mux"
 )
@@ -55,4 +57,20 @@ func getThreads(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "\nThe number of successful calls were: "+fmt.Sprintf("%d", titleData.status.success)+".")
 	fmt.Fprintln(w, "The number of failed calls were: "+fmt.Sprintf("%d", titleData.status.fail)+".")
 	return
+}
+
+//
+func (s *myServer) shutdownHandler(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Shutdown server"))
+
+	//Do nothing if shutdown request already issued
+	//if s.reqCount == 0 then set to 1, return true otherwise false
+	if !atomic.CompareAndSwapUint32(&s.reqCount, 0, 1) {
+		log.Printf("Shutdown through API call in progress...")
+		return
+	}
+
+	go func() {
+		s.shutdownReq <- true
+	}()
 }

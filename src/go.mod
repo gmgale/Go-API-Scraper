@@ -1,4 +1,4 @@
-module api-test
+module goscraperapi
 
 go 1.15
 
