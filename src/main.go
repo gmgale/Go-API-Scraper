@@ -20,9 +20,14 @@ var urls = [...]string{
 
 func main() {
 
+	var port string
+	flag.StringVar(&port, "port", "8080", "Port for server setup. Default is 8080.")
+
 	flag.Parse()
 
-	server := newServer()
+	log.Println("Port is set to: " + port)
+
+	server := newServer(port)
 
 	done := make(chan bool)
 	go func() {

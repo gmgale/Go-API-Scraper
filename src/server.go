@@ -15,11 +15,11 @@ import (
 
 // newServer sets up a localhost server using the gorilla/mux package
 // and calls handlers for endpoints.
-func newServer() *myServer {
+func newServer(port string) *myServer {
 
 	s := &myServer{
 		Server: http.Server{
-			Addr:         ":8080",
+			Addr:         (":" + port),
 			ReadTimeout:  10 * time.Second,
 			WriteTimeout: 10 * time.Second,
 		},
