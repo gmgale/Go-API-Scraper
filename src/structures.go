@@ -17,3 +17,17 @@ type myServer struct {
 	shutdownReq chan bool
 	reqCount    uint32
 }
+
+type dataJSON struct {
+	time    int
+	results struct {
+		site []struct {
+			url   string
+			title string
+		}
+	}
+	threads  int
+	succeded int
+	failed   int
+	duration int
+}
