@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Go Scraping API
+  title: Go API Scraping
   description: A web API for scraping web titles using concurrent Goroutines
   version: 1.0.0
   contact:

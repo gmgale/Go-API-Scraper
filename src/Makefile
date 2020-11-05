@@ -22,5 +22,3 @@ deps:
 	$(GOGET) github.com/gorilla/mux
 build-linux:
     CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(BINARY_UNIX) -v
-docker-build:
-	docker run --rm -it -v "$(GOPATH)":/go -w /go/src/github.com/gmgale/result_task golang:latest go build -o "$(BINARY_UNIX)" -v

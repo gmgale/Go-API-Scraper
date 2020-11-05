@@ -1,7 +1,11 @@
 FROM golang:latest
-ADD . /go/src/github.com/gmgale/result_task
-WORKDIR /go/src/github.com/gmgale/result_task
+ADD . /go/src/github.com/gmgale/result_task/src
+WORKDIR /go/src/github.com/gmgale/result_task/src
 RUN go get github.com/gorilla/mux
 RUN go install
-ENTRYPOINT ["/go/bin/api-test"]
-EXPOSE 8080
+
+FROM alpine:latest
+WORKDIR /root/
+COPY --from=0 /go/src/github.com/gmgale/result_task/src .
+CMD [ "./goapiscraper.exe" ]
+EXPOSE 8080:9000

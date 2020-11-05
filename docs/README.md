@@ -1,4 +1,4 @@
-Goscraperapi implements the RESTful endpoint API, which makes concurrent calls to the following websites:
+Goapiscraper implements the RESTful endpoint API, which makes concurrent calls to the following websites:
 
 https://www.result.si/projekti/ 
 https://www.result.si/o-nas/
