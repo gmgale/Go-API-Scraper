@@ -15,6 +15,8 @@ const (
 	dbname   = "postgres"
 )
 
+var db *sql.DB
+
 // bdConnect is a function to init and connect to a SQL database
 func dbConnect() {
 

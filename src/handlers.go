@@ -1,11 +1,13 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 	"sync/atomic"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -41,6 +43,9 @@ func getThreads(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
 
+	// clockstart is used later for mesuring the duration of the process.
+	clockStart := time.Now()
+
 	// vars is a call to the mux router to recive the varibles from the http request.
 	vars := mux.Vars(r)
 
@@ -72,5 +77,23 @@ func getThreads(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Fprintln(w, "\nThe number of successful calls were: "+fmt.Sprintf("%d", titleData.status.success)+".")
 	fmt.Fprintln(w, "The number of failed calls were: "+fmt.Sprintf("%d", titleData.status.fail)+".")
+
+	clockStop := time.Now()
+
+	// Prepare data to be sent via JSON to database
+	newData := new(dataJSON)
+	newData.time = clockStart.String()
+	newData.duration = clockStop.Sub(clockStart).String()
+	newData.threads = intThreads
+	newData.succeded = titleData.status.success
+	newData.failed = titleData.status.fail
+
+	for i := 0; i < len(urls); i++ {
+		newData.results[i].url = append(newData.results[i].url, urls[i])
+		newData.results.title = append(newData.results.title, titleData.titles[i])
+	}
+
+	dbSend(newData)
+
 	return
 }

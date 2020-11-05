@@ -19,15 +19,14 @@ type myServer struct {
 }
 
 type dataJSON struct {
-	time    int
-	results struct {
-		site []struct {
-			url   string
-			title string
-		}
+	id      int
+	time    string
+	results []struct {
+		url   string
+		title string
 	}
 	threads  int
 	succeded int
 	failed   int
-	duration int
+	duration string
 }
