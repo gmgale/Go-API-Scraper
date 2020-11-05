@@ -25,8 +25,8 @@ func main() {
 
 	flag.Parse()
 
-	log.Println("Port is set to: " + port)
-
+	dbConnect()
+	
 	server := newServer(port)
 
 	done := make(chan bool)
