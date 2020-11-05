@@ -1,4 +1,4 @@
-module goscraperapi
+module goapiscraper
 
 go 1.15
 

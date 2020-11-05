@@ -1,13 +1,5 @@
-services:
-  my-api:
-    build:
-      context: .
-      dockerfile: dockerfile
-    
-    
-    ports:
-      - "8080:9000"
-    volumes:
-      - /files/
-
-    container_name: goapiscraper_container
+api:
+  build: .\
+  ports:
+    - 8080:9000
+  container_name: goapiscraper_container
