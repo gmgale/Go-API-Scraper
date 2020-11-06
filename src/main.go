@@ -17,6 +17,7 @@ var urls = [...]string{
 	"https://www.result.si/kariera/",
 	"https://www.result.si/blog/",
 }
+var globalCallCounter = 0
 
 func main() {
 
@@ -26,7 +27,7 @@ func main() {
 	flag.Parse()
 
 	dbConnect()
-	
+
 	server := newServer(port)
 
 	done := make(chan bool)

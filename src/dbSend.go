@@ -6,13 +6,13 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func dbSend(data dataJSON) {
-	newDataJSON, err := json.Marshal(data)
+func dbSend(newData titleDataStr) {
+	titleDataStr, err := json.Marshal(newData)
 
 	sqlStatement := `
 	INSERT INTO webcalls (data) 
 	VALUES ($1)`
-	_, err = db.Exec(sqlStatement, newDataJSON)
+	_, err = db.Exec(sqlStatement, titleDataStr)
 	if err != nil {
 		panic(err)
 	}

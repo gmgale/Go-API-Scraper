@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -69,31 +68,27 @@ func getThreads(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprintln(w, "Threads: "+threads+".\n")
 
-	titleData := getTitle(intThreads)
+	newData := getTitle(intThreads)
 
-	fmt.Fprintln(w, fmt.Sprintf("%d", titleData.status.success)+" titles were found:\n")
-	for i := 0; i < len(titleData.titles); i++ {
-		fmt.Fprintln(w, titleData.titles[i])
+	fmt.Fprintln(w, fmt.Sprintf("%d", newData.status.succeeded)+" titles were found:\n")
+	for i := 0; i < len(newData.results); i++ {
+		fmt.Fprintln(w, newData.results[i].url)
+		fmt.Fprintln(w, newData.results[i].title)
 	}
-	fmt.Fprintln(w, "\nThe number of successful calls were: "+fmt.Sprintf("%d", titleData.status.success)+".")
-	fmt.Fprintln(w, "The number of failed calls were: "+fmt.Sprintf("%d", titleData.status.fail)+".")
+	fmt.Fprintln(w, "\nThe number of successful calls were: "+fmt.Sprintf("%d", newData.status.succeeded)+".")
+	fmt.Fprintln(w, "The number of failed calls were: "+fmt.Sprintf("%d", newData.status.failed)+".")
 
 	clockStop := time.Now()
 
-	// Prepare data to be sent via JSON to database
-	newData := new(dataJSON)
+	// finish populating newData to be sent via JSON to database
 	newData.time = clockStart.String()
 	newData.duration = clockStop.Sub(clockStart).String()
 	newData.threads = intThreads
-	newData.succeded = titleData.status.success
-	newData.failed = titleData.status.fail
+	newData.id = globalCallCounter
 
-	for i := 0; i < len(urls); i++ {
-		newData.results[i].url = append(newData.results[i].url, urls[i])
-		newData.results.title = append(newData.results.title, titleData.titles[i])
-	}
+	globalCallCounter++
 
-	dbSend(newData)
-
+	//dbSend(newData)
+	fmt.Fprintln(w, newData)
 	return
 }

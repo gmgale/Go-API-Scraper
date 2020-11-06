@@ -11,9 +11,7 @@ import (
 // then any remaining urls will be processed concurrently.
 func getTitle(threads int) titleDataStr {
 
-	// titleData is a struct to hold an array of titles (string)
-	// and a struct of status sucess/fail counts (int)
-	titleData := titleDataStr{}
+	newTitleData := titleDataStr{}
 
 	quotient := len(urls) / threads
 	remainder := len(urls) % threads
@@ -26,15 +24,24 @@ func getTitle(threads int) titleDataStr {
 			select {
 			case status := <-statCh:
 				if status == statusSucceeded {
-					titleData.status.success++
+					newTitleData.status.succeeded++
 				}
 				if status == statusFailed {
-					titleData.status.fail++
+					newTitleData.status.failed++
 				}
 			}
 			newTitle := <-urlCh
 			if newTitle != "" {
-				titleData.titles = append(titleData.titles, newTitle)
+				x := urlTitleStr{}
+				x.url = urls[threads*i+j]
+				x.title = newTitle
+				newTitleData.results = append(newTitleData.results, x)
+			}
+			if newTitle == "" {
+				x := urlTitleStr{}
+				x.url = urls[threads*i+j]
+				x.title = "Title not found"
+				newTitleData.results = append(newTitleData.results, x)
 			}
 		}
 		wg.Wait()
@@ -49,15 +56,24 @@ func getTitle(threads int) titleDataStr {
 			select {
 			case status := <-statCh:
 				if status == statusSucceeded {
-					titleData.status.success++
+					newTitleData.status.succeeded++
 				}
 				if status == statusFailed {
-					titleData.status.fail++
+					newTitleData.status.failed++
 				}
 			}
 			newTitle := <-urlCh
 			if newTitle != "" {
-				titleData.titles = append(titleData.titles, newTitle)
+				x := urlTitleStr{}
+				x.url = urls[threads*quotient+k]
+				x.title = newTitle
+				newTitleData.results = append(newTitleData.results, x)
+			}
+			if newTitle == "" {
+				x := urlTitleStr{}
+				x.url = urls[threads*quotient+k]
+				x.title = "Title not found"
+				newTitleData.results = append(newTitleData.results, x)
 			}
 		}
 	}
@@ -65,5 +81,5 @@ func getTitle(threads int) titleDataStr {
 
 	fmt.Println("getTitle funcion exiting.")
 
-	return titleData
+	return newTitleData
 }

@@ -3,14 +3,14 @@ package main
 import "net/http"
 
 // titleDataStr is a structure to hold a list of titles (string)
-// and a struct of returned success and failed counts (int)
-type titleDataStr struct {
-	titles []string
-	status struct {
-		success int
-		fail    int
-	}
-}
+// // and a struct of returned success and failed counts (int)
+// type titleDataStr struct {
+// 	titles []string
+// 	status struct {
+// 		success int
+// 		fail    int
+// 	}
+// }
 
 type myServer struct {
 	http.Server
@@ -18,15 +18,21 @@ type myServer struct {
 	reqCount    uint32
 }
 
-type dataJSON struct {
-	id      int
-	time    string
-	results []struct {
-		url   string
-		title string
-	}
+type titleDataStr struct {
+	id       int
+	time     string
 	threads  int
-	succeded int
-	failed   int
+	results  []urlTitleStr
+	status   statusStr
 	duration string
+}
+
+type urlTitleStr struct {
+	url   string
+	title string
+}
+
+type statusStr struct {
+	succeeded int
+	failed    int
 }
