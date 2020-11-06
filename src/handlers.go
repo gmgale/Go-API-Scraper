@@ -70,21 +70,21 @@ func getThreads(w http.ResponseWriter, r *http.Request) {
 
 	newData := getTitle(intThreads)
 
-	fmt.Fprintln(w, fmt.Sprintf("%d", newData.status.succeeded)+" titles were found:\n")
-	for i := 0; i < len(newData.results); i++ {
-		fmt.Fprintln(w, newData.results[i].url)
-		fmt.Fprintln(w, newData.results[i].title)
+	fmt.Fprintln(w, fmt.Sprintf("%d", newData.Status.Succeeded)+" titles were found:\n")
+	for i := 0; i < len(newData.Results); i++ {
+		fmt.Fprintln(w, newData.Results[i].Url)
+		fmt.Fprintln(w, newData.Results[i].Title)
 	}
-	fmt.Fprintln(w, "\nThe number of successful calls were: "+fmt.Sprintf("%d", newData.status.succeeded)+".")
-	fmt.Fprintln(w, "The number of failed calls were: "+fmt.Sprintf("%d", newData.status.failed)+".")
+	fmt.Fprintln(w, "\nThe number of successful calls were: "+fmt.Sprintf("%d", newData.Status.Succeeded)+".")
+	fmt.Fprintln(w, "The number of failed calls were: "+fmt.Sprintf("%d", newData.Status.Failed)+".")
 
 	clockStop := time.Now()
 
 	// finish populating newData to be sent via JSON to database
-	newData.time = clockStart.String()
-	newData.duration = clockStop.Sub(clockStart).String()
-	newData.threads = intThreads
-	newData.id = globalCallCounter
+	newData.Time = clockStart.String()
+	newData.Duration = clockStop.Sub(clockStart).String()
+	newData.Threads = intThreads
+	newData.SessionId = globalCallCounter
 
 	globalCallCounter++
 

@@ -11,7 +11,7 @@ import (
 // then any remaining urls will be processed concurrently.
 func getTitle(threads int) titleDataStr {
 
-	newTitleData := titleDataStr{}
+	var newTitleData titleDataStr
 
 	quotient := len(urls) / threads
 	remainder := len(urls) % threads
@@ -24,24 +24,24 @@ func getTitle(threads int) titleDataStr {
 			select {
 			case status := <-statCh:
 				if status == statusSucceeded {
-					newTitleData.status.succeeded++
+					newTitleData.Status.Succeeded++
 				}
 				if status == statusFailed {
-					newTitleData.status.failed++
+					newTitleData.Status.Failed++
 				}
 			}
 			newTitle := <-urlCh
 			if newTitle != "" {
 				x := urlTitleStr{}
-				x.url = urls[threads*i+j]
-				x.title = newTitle
-				newTitleData.results = append(newTitleData.results, x)
+				x.Url = urls[threads*i+j]
+				x.Title = newTitle
+				newTitleData.Results = append(newTitleData.Results, x)
 			}
 			if newTitle == "" {
 				x := urlTitleStr{}
-				x.url = urls[threads*i+j]
-				x.title = "Title not found"
-				newTitleData.results = append(newTitleData.results, x)
+				x.Url = urls[threads*i+j]
+				x.Title = "Title not found"
+				newTitleData.Results = append(newTitleData.Results, x)
 			}
 		}
 		wg.Wait()
@@ -56,24 +56,24 @@ func getTitle(threads int) titleDataStr {
 			select {
 			case status := <-statCh:
 				if status == statusSucceeded {
-					newTitleData.status.succeeded++
+					newTitleData.Status.Succeeded++
 				}
 				if status == statusFailed {
-					newTitleData.status.failed++
+					newTitleData.Status.Failed++
 				}
 			}
 			newTitle := <-urlCh
 			if newTitle != "" {
 				x := urlTitleStr{}
-				x.url = urls[threads*quotient+k]
-				x.title = newTitle
-				newTitleData.results = append(newTitleData.results, x)
+				x.Url = urls[threads*quotient+k]
+				x.Title = newTitle
+				newTitleData.Results = append(newTitleData.Results, x)
 			}
 			if newTitle == "" {
 				x := urlTitleStr{}
-				x.url = urls[threads*quotient+k]
-				x.title = "Title not found"
-				newTitleData.results = append(newTitleData.results, x)
+				x.Url = urls[threads*quotient+k]
+				x.Title = "Title not found"
+				newTitleData.Results = append(newTitleData.Results, x)
 			}
 		}
 	}

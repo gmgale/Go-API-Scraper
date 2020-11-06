@@ -19,20 +19,20 @@ type myServer struct {
 }
 
 type titleDataStr struct {
-	id       int
-	time     string
-	threads  int
-	results  []urlTitleStr
-	status   statusStr
-	duration string
+	SessionId       int
+	Time     string
+	Threads  int
+	Results  []urlTitleStr
+	Status   statusStr
+	Duration string
 }
 
 type urlTitleStr struct {
-	url   string
-	title string
+	Url   string
+	Title string
 }
 
 type statusStr struct {
-	succeeded int
-	failed    int
+	Succeeded int
+	Failed    int
 }

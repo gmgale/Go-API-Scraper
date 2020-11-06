@@ -3,13 +3,18 @@ package main
 import (
 	"encoding/json"
 	_ "github.com/lib/pq"
+	"log"
 )
 
 func dbSend(newData titleDataStr) {
-	newDataJSON, err := json.Marshal(newData)
+
+	log.Println(newData)
+	var newDataJSON []byte
+	newDataJSON, err := json.MarshalIndent(newData, "", "	")
+
 	sqlStatement := `
 	INSERT INTO calls (data) 
-	VALUES ($1)`
+	VALUES ($1);`
 	_, err = db.Exec(sqlStatement, newDataJSON)
 	if err != nil {
 		panic(err)

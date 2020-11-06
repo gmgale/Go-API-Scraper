@@ -4,26 +4,34 @@ import (
 	// "database/sql"
 	//"encoding/json"
 
+	"fmt"
 	"log"
 	"net/http"
 )
+
+type rowStr struct {
+	data string
+}
 
 func dispResults(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "text/plain")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
 
-	rows, _ := db.Query("SELECT data FROM calls LIMIT $1", 3)
+	rows, _ := db.Query(`SELECT data FROM calls;`)
 
-	var data titleDataStr
+	for rows.Next() {
+		var row rowStr
+
+		err := rows.Scan(&row.data)
+		if err != nil {
+			log.Println("ERROR 1")
+		} else {
+			fmt.Fprintln(w, row)
+			log.Println(row)
+		}
+	}
 
 	defer rows.Close()
-	for rows.Next() {
-		err := rows.Scan(&data)
-		if err != nil {
-			log.Fatal(err)
-		}
-		log.Println(data)
-		//textData := json.Unmarshal(data []byte, titleDataStr)
-	}
+
 }
