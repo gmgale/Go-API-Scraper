@@ -88,7 +88,6 @@ func getThreads(w http.ResponseWriter, r *http.Request) {
 
 	globalCallCounter++
 
-	//dbSend(newData)
-	fmt.Fprintln(w, newData)
+	dbSend(newData)
 	return
 }
