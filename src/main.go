@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"flag"
-	"fmt"
 	"log"
 
 	_ "github.com/lib/pq"
@@ -12,12 +11,6 @@ import (
 const (
 	statusSucceeded = "succeeded"
 	statusFailed    = "failed"
-
-	host     = "localhost"
-	port     = 5432
-	user     = "postgres"
-	password = "postgres"
-	dbname   = "webcalls"
 )
 
 // urls is a list of web addresses that will be processed.
@@ -37,22 +30,7 @@ func main() {
 	flag.StringVar(&flagPort, "flagPort", "8080", "Port for server setup. Default is 8080.")
 	flag.Parse()
 
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
-		"password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbname)
-
-	var err error
-	db, err = sql.Open("postgres", psqlInfo)
-	if err != nil {
-		panic(err)
-	}
-
-	err = db.Ping()
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println("Successfully connected to PostgreSQL server!")
+	dbConnect()
 
 	server := newServer(flagPort)
 
@@ -67,7 +45,7 @@ func main() {
 
 	server.waitShutdown()
 	<-done
-	log.Printf("DONE!")
+	log.Printf("Server has shut down.")
 
 	closeChannels()
 	db.Close()

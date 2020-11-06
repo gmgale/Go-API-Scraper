@@ -29,12 +29,14 @@ func newServer(port string) *myServer {
 	router := mux.NewRouter()
 
 	// Register handlers
+	router.HandleFunc("/api/results", dispResults)
 	router.HandleFunc("/api", topLevel)
 	router.HandleFunc("/api/{Id=threads}", getThreads)
 	router.HandleFunc("/shutdown", s.shutdownHandler)
 
 	// Set http server handler
 	s.Handler = router
+	http.Handle("/", router)
 
 	return s
 }
