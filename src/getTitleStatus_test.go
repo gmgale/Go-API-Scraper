@@ -10,8 +10,8 @@ func TestGetTitleStatusCount(t *testing.T) {
 
 	// Arrange
 	titleData := getTitle(threads)
-	statusSuccess := titleData.status.succeeded
-	statusFail := titleData.status.failed
+	statusSuccess := titleData.Status.Succeeded
+	statusFail := titleData.Status.Failed
 
 	// Act
 	if (statusSuccess + statusFail) != len(urls) {
