@@ -84,9 +84,6 @@ func getThreads(w http.ResponseWriter, r *http.Request) {
 	newData.Time = clockStart.String()
 	newData.Duration = clockStop.Sub(clockStart).String()
 	newData.Threads = intThreads
-	newData.SessionId = globalCallCounter
-
-	globalCallCounter++
 
 	dbSend(newData)
 	return

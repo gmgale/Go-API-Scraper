@@ -19,7 +19,6 @@ type myServer struct {
 }
 
 type titleDataStr struct {
-	SessionId int
 	Time      string
 	Threads   int
 	Results   []urlTitleStr

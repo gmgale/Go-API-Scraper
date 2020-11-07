@@ -21,7 +21,6 @@ var urls = [...]string{
 	"https://www.result.si/blog/",
 }
 
-var globalCallCounter = 0
 var db *sql.DB
 
 func main() {
