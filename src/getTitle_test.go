@@ -10,8 +10,10 @@ func TestGetTitle(t *testing.T) {
 
 	// Arrange
 	titleData := getTitle(threads)
-	titles := titleData.Results.Title
-
+	var titles []string
+	for i := 0; i < len(titleData.Results); i++ {
+		titles = append(titles, titleData.Results[i].Title)
+	}
 	// Act
 	if len(titles) < len(urls) {
 
