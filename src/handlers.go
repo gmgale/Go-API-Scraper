@@ -18,6 +18,8 @@ func topLevel(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
 	fmt.Fprintln(w, "Welcome!\n\nAppend'/x' to the URL (where x is a number 1-4), to enable concurrent threads/Goroutines.")
+	fmt.Fprintln(w, "\nAppend /results to the URL to pull all data from the database and display in the browser.")
+	fmt.Fprintln(w, "\nIP:port/shutdown will initiate a server shutdown.")
 }
 
 // shutdownHandler is a handler for starting API shutdown request
@@ -51,7 +53,6 @@ func getThreads(w http.ResponseWriter, r *http.Request) {
 	// threads is a string from the list of varibles provided by mux.Vars.
 	threads := vars["Id=threads"]
 
-	// intThreads is the varible "threads" converted fromstring to int.
 	intThreads, err := strconv.Atoi(threads)
 	if err != nil {
 		fmt.Fprintln(w, "Invalid input ("+threads+").")
@@ -78,9 +79,8 @@ func getThreads(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "\nThe number of successful calls were: "+fmt.Sprintf("%d", newData.Status.Succeeded)+".")
 	fmt.Fprintln(w, "The number of failed calls were: "+fmt.Sprintf("%d", newData.Status.Failed)+".")
 
-	clockStop := time.Now()
-
 	// finish populating newData to be sent via JSON to database
+	clockStop := time.Now()
 	newData.Time = clockStart.String()
 	newData.Duration = clockStop.Sub(clockStart).String()
 	newData.Threads = intThreads

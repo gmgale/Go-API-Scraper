@@ -24,7 +24,6 @@ var urls = [...]string{
 var db *sql.DB
 
 func main() {
-
 	var flagPort string
 	flag.StringVar(&flagPort, "flagPort", "8080", "Port for server setup. Default is 8080.")
 	flag.Parse()

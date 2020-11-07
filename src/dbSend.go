@@ -2,13 +2,13 @@ package main
 
 import (
 	"encoding/json"
+
 	_ "github.com/lib/pq"
-	"log"
 )
 
+//dbSend is a function to send data to the database.
 func dbSend(newData titleDataStr) {
 
-	log.Println(newData)
 	var newDataJSON []byte
 	newDataJSON, err := json.MarshalIndent(newData, "", "	")
 

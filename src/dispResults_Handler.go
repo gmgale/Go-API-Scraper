@@ -1,9 +1,6 @@
 package main
 
 import (
-	// "database/sql"
-	//"encoding/json"
-
 	"fmt"
 	"log"
 	"net/http"
@@ -14,6 +11,8 @@ type rowStr struct {
 	id   int
 }
 
+// dispResults is a function to pull data from the database
+// and then print to the browser.
 func dispResults(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "text/plain")
 	w.Header().Set("Access-Control-Allow-Origin", "*")

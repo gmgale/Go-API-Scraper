@@ -79,7 +79,5 @@ func getTitle(threads int) titleDataStr {
 	}
 	wg.Wait()
 
-	fmt.Println("getTitle funcion exiting.")
-
 	return newTitleData
 }

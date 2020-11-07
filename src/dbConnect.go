@@ -15,6 +15,7 @@ const (
 	dbname   = "webcalls"
 )
 
+// dbConnect is a function to connect to the database.
 func dbConnect() {
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
@@ -32,5 +33,4 @@ func dbConnect() {
 	}
 
 	fmt.Println("Successfully connected to PostgreSQL server!")
-
 }
