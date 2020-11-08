@@ -19,7 +19,5 @@ run:
 	./$(BINARY_NAME)
 deps:
 	$(GOGET) github.com/gorilla/mux
-docker-newnet:
-	Docker network create myNetwork
-docker-compose:
-	docker-compose up
+docker-new:
+	docker-compose up --build --force-recreate

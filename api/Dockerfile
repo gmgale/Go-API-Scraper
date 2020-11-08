@@ -5,8 +5,8 @@ WORKDIR /app/src
 RUN go get github.com/gorilla/mux
 COPY . 	.
 EXPOSE 5432 8080
-
 RUN go build
+CMD [ "./wait-for", "db:5432" ]
 CMD [ "./goapiscraper" ]
 
 
