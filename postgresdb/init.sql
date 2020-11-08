@@ -1,0 +1,5 @@
+CREATE DATABASE webcalls;
+CREATE TABLE calls (
+id SERIAL PRIMARY KEY,
+data JSON
+);

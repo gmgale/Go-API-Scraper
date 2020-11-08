@@ -1,0 +1,38 @@
+version: "3.8"
+services:
+  postgresdb:
+    build: ./postgresdb
+    container_name: postgres_container
+    hostname: postgres_container
+    ports: 
+      - "5432:5432"
+    networks: 
+      - myNetwork
+    environment: 
+      - "POSTGRES_USER=postgres"
+      - "POSTGRES_PASSWORD=postgres"
+      - "POSTGRES_DB=webcalls"
+    volumes:
+      - dbdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  api:
+    depends_on: 
+      postgresdb:
+        condition: service_healthy
+    build: ./api
+    image: goapiscraper_image
+    container_name: goapiscraper_container
+    ports: 
+      - "8080:8080"
+    networks: 
+      - myNetwork
+volumes:
+   dbdata: {}
+networks: 
+  myNetwork:
+    external: 
+      name: myNetwork
