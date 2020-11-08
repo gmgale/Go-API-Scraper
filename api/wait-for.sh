@@ -1,4 +1,5 @@
 #!/bin/sh
+# A shell script to delay the starting of the API until the databse is ready.
 
 TIMEOUT=15
 QUIET=0
