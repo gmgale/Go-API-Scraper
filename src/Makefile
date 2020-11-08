@@ -5,7 +5,6 @@
     GOTEST=$(GOCMD) test
     GOGET=$(GOCMD) get
     BINARY_NAME=goapiscraper.exe
-	BINARY_UNIX=$(BINARY_NAME)_unix
 
 all: test build
 build:
@@ -20,5 +19,6 @@ run:
 	./$(BINARY_NAME)
 deps:
 	$(GOGET) github.com/gorilla/mux
-build-linux:
-    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(BINARY_UNIX) -v
+docker-run:
+	docker-compose up postgresdb
+	docker-compose up api

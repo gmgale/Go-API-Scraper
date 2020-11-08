@@ -1,11 +1,16 @@
 FROM golang:latest
-ADD . /go/src/github.com/gmgale/result_task/src
-WORKDIR /go/src/github.com/gmgale/result_task/src
-RUN go get github.com/gorilla/mux
-RUN go install
 
-FROM alpine:latest
-COPY --from=0 /go/bin /api
-WORKDIR /api
-EXPOSE 8080
+RUN mkdir -p /app/src
+WORKDIR /app/src
+RUN go get github.com/gorilla/mux
+COPY . 	.
+EXPOSE 5432
+
+RUN go build
 CMD [ "./goapiscraper" ]
+
+
+# FROM alpine:latest
+# COPY --from=0 . /app/src
+# WORKDIR /app/src
+# EXPOSE 8080:9000
