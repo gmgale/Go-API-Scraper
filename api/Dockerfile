@@ -4,7 +4,7 @@ RUN mkdir -p /app/src
 WORKDIR /app/src
 RUN go get github.com/gorilla/mux
 COPY . 	.
-EXPOSE 5432
+EXPOSE 5432 8080
 
 RUN go build
 CMD [ "./goapiscraper" ]

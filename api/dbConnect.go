@@ -3,12 +3,13 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
 	_ "github.com/lib/pq"
 )
 
 const (
-	host     = "postgresdb"
+	host     = "localhost"
 	port     = 5432
 	user     = "postgres"
 	password = "postgres"
@@ -22,7 +23,13 @@ func dbConnect() {
 		host, port, user, password, dbname)
 
 	var err error
-	db, err = sql.Open("postgres", psqlInfo)
+	for i := 0; i < 5; i++ {
+		db, err = sql.Open("postgres", psqlInfo)
+		if err != nil {
+			fmt.Sprintln("Connecting to database. Tries remaining: ", i)
+		}
+		time.Sleep(5)
+	}
 	if err != nil {
 		panic(err)
 	}
