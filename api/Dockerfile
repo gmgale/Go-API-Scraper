@@ -5,7 +5,7 @@ ADD *.go /build/
 WORKDIR /build
 RUN go get github.com/gorilla/mux
 RUN go get github.com/lib/pq
-RUN go build -a -o myAPI
+RUN CGO_ENABLED=0 GOOS=linux go build -a -o myAPI
 
 # generate clean, final image for end users
 FROM alpine:latest
@@ -15,4 +15,4 @@ EXPOSE 8080:9000
 # executable
 ENTRYPOINT [ "./myAPI" ]
 # arguments that can be overridden
-CMD [ "-p", "8080" ]
+CMD [ "-port", "8080" ]
