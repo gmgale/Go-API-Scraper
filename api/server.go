@@ -35,7 +35,7 @@ func newServer(port string) *myServer {
 	router.HandleFunc("/api/shutdown", s.shutdownHandler)
 
 	// Set http server handler
-	//s.Handler = router
+	s.Handler = router
 	http.Handle("/", router)
 
 	return s
