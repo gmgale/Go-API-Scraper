@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 
 	_ "github.com/lib/pq"
 )
@@ -17,6 +18,6 @@ func dbSend(newData titleDataStr) {
 	VALUES ($1);`
 	_, err = db.Exec(sqlStatement, newDataJSON)
 	if err != nil {
-		panic(err)
+		fmt.Printf("Error sending new data to database.\n%v", err)
 	}
 }
