@@ -28,16 +28,15 @@ func newServer(port string) *myServer {
 
 	router := mux.NewRouter()
 
+	// Set http server handler
+
 	// Register handlers
-	router.HandleFunc("/api/results", dispResults)
-	router.HandleFunc("/api", topLevel)
-	router.HandleFunc("/api/{Id=threads}", getThreads)
+	router.HandleFunc("/", topLevel)
+	router.HandleFunc("/webcall/{Id=threads}", getThreads)
+	router.HandleFunc("/results", dispResults)
 	router.HandleFunc("/shutdown", s.shutdownHandler)
 
-	// Set http server handler
-	s.Handler = router
 	http.Handle("/", router)
-
 	return s
 }
 
@@ -51,7 +50,7 @@ func (s *myServer) waitShutdown() {
 	case sig := <-irqSig:
 		log.Printf("Shutdown request (signal: %v)", sig)
 	case sig := <-s.shutdownReq:
-		log.Printf("Shutdown request (/shutdown %v)", sig)
+		log.Printf("Shutdown request (api/shutdown %v)", sig)
 	}
 
 	log.Printf("Stoping http server ...")

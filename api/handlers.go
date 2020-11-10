@@ -17,14 +17,15 @@ func topLevel(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(http.StatusOK)
 
-	fmt.Fprintln(w, "Welcome!\n\nAppend'/x' to the URL (where x is a number 1-4), to enable concurrent threads/Goroutines.")
-	fmt.Fprintln(w, "\nAppend /results to the URL to pull all data from the database and display in the browser.")
-	fmt.Fprintln(w, "\nIP:port/shutdown will initiate a server shutdown.")
+	fmt.Fprintln(w, "Welcome!\n\nAppend'/webcall/n' to the URL (where n is a number between 1 and totlat URL's), to enable concurrent threads/Goroutines.")
+	fmt.Fprintln(w, "/results will display all items from the database.")
+	fmt.Fprintln(w, "/shutdown will shut the server down.")
+
 }
 
 // shutdownHandler is a handler for starting API shutdown request
 func (s *myServer) shutdownHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Shutdown server"))
+	w.Write([]byte("Server is shutting down..."))
 
 	// Do nothing if shutdown request already issued
 	// if s.reqCount == 0 then set to 1, return true otherwise false
@@ -32,7 +33,6 @@ func (s *myServer) shutdownHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Shutdown through API call in progress...")
 		return
 	}
-
 	go func() {
 		s.shutdownReq <- true
 	}()
