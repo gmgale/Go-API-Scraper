@@ -32,10 +32,10 @@ func newServer(port string) *myServer {
 	router.HandleFunc("/api/results", dispResults)
 	router.HandleFunc("/api", topLevel)
 	router.HandleFunc("/api/{Id=threads}", getThreads)
-	router.HandleFunc("/shutdown", s.shutdownHandler)
+	router.HandleFunc("/api/shutdown", s.shutdownHandler)
 
 	// Set http server handler
-	s.Handler = router
+	//s.Handler = router
 	http.Handle("/", router)
 
 	return s
