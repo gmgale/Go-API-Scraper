@@ -25,10 +25,12 @@ var db *sql.DB
 
 func main() {
 	var flagPort string
-	flag.StringVar(&flagPort, "port", "8080", "Port for server setup. Default is 8080.")
+	flag.StringVar(&flagPort, "port", "8080", "Port for server setup.")
+	var host string
+	flag.StringVar(&host, "host", "dockerHost", "Host to connect to.")
 	flag.Parse()
 
-	dbConnect()
+	dbConnect(host)
 
 	server := newServer(flagPort)
 

@@ -20,7 +20,6 @@ func topLevel(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Welcome!\n\nAppend'/webcall/n' to the URL (where n is a number between 1 and totlat URL's), to enable concurrent threads/Goroutines.")
 	fmt.Fprintln(w, "/results will display all items from the database.")
 	fmt.Fprintln(w, "/shutdown will shut the server down.")
-
 }
 
 // shutdownHandler is a handler for starting API shutdown request

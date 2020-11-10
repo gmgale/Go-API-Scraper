@@ -19,5 +19,12 @@ run:
 	./$(BINARY_NAME)
 deps:
 	$(GOGET) github.com/gorilla/mux
+
+# Create a fresh docker build and run
 docker-new:
 	docker-compose up --build --force-recreate
+# Build and run the API on the localhost server (localhost flag)
+local-run:
+	api/goapiscraper -host localhost
+	
+	

@@ -10,7 +10,6 @@ import (
 )
 
 const (
-	host     = "db"
 	port     = 5432
 	user     = "postgres"
 	password = "postgres"
@@ -18,7 +17,7 @@ const (
 )
 
 // dbConnect is a function to connect to the database.
-func dbConnect() {
+func dbConnect(host string) {
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=disable",
 		host, port, user, password, dbname)

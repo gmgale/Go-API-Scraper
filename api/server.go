@@ -28,8 +28,6 @@ func newServer(port string) *myServer {
 
 	router := mux.NewRouter()
 
-	// Set http server handler
-
 	// Register handlers
 	router.HandleFunc("/", topLevel)
 	router.HandleFunc("/webcall/{Id=threads}", getThreads)
