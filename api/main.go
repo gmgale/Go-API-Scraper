@@ -27,7 +27,7 @@ func main() {
 	var flagPort string
 	flag.StringVar(&flagPort, "port", "8080", "Port for server setup.")
 	var host string
-	flag.StringVar(&host, "host", "dockerHost", "Host to connect to.")
+	flag.StringVar(&host, "host", "db", "Host to connect to.")
 	flag.Parse()
 
 	dbConnect(host)

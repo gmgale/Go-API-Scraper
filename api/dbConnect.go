@@ -44,7 +44,7 @@ func dbConnect(host string) {
 			break
 		}
 		if i == 0 {
-			fmt.Printf("Error pining database. Use 'localhost' for testing and 'db' for docker.\n %v", err)
+			fmt.Printf("Error pinging database. Use 'localhost' for testing and 'dockerHost' for docker.\n %v", err)
 			os.Exit(1)
 		}
 	}
