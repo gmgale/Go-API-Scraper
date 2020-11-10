@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Go API Scraping
+  title: Go API Scraper
   description: A web API for scraping web titles using concurrent Goroutines
   version: 1.0.0
   contact:
@@ -10,13 +10,13 @@ servers:
   - url: http://localhost:8080/
     
 paths:
-  "/api":
+  "/":
     get:
       summary: Splash screen with basic API instructions.
       responses:
           '200':
             description: Responded OK - 200
-  "/api/{Id=threads}":
+  "/api/webcall/{Id=threads}":
     get:
       summary: Prints titles of web pages to screen.
       description: User defined threds/Goroutines as argument.
@@ -31,4 +31,15 @@ paths:
       responses: 
         '200':
           description: Responded OK - 200
-          
+  "/results":
+    get:
+      summary: Dispay all database JSON content in plain text.
+      responses:
+          '200':
+            description: Responded OK - 200
+    "/shutdown":
+    get:
+      summary: Gracefully shut down the API server.
+      responses:
+          '200':
+            description: Responded OK - 200
