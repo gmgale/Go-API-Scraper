@@ -73,7 +73,7 @@ func getThreads(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprintln(w, fmt.Sprintf("%d", newData.Status.Succeeded)+" titles were found:\n")
 	for i := 0; i < len(newData.Results); i++ {
-		fmt.Fprintln(w, newData.Results[i].Url)
+		fmt.Fprintln(w, newData.Results[i].URL)
 		fmt.Fprintln(w, newData.Results[i].Title)
 	}
 	fmt.Fprintln(w, "\nThe number of successful calls were: "+fmt.Sprintf("%d", newData.Status.Succeeded)+".")

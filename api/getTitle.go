@@ -33,13 +33,13 @@ func getTitle(threads int) titleDataStr {
 			newTitle := <-urlCh
 			if newTitle != "" {
 				x := urlTitleStr{}
-				x.Url = urls[threads*i+j]
+				x.URL = urls[threads*i+j]
 				x.Title = newTitle
 				newTitleData.Results = append(newTitleData.Results, x)
 			}
 			if newTitle == "" {
 				x := urlTitleStr{}
-				x.Url = urls[threads*i+j]
+				x.URL = urls[threads*i+j]
 				x.Title = "Title not found"
 				newTitleData.Results = append(newTitleData.Results, x)
 			}
@@ -65,13 +65,13 @@ func getTitle(threads int) titleDataStr {
 			newTitle := <-urlCh
 			if newTitle != "" {
 				x := urlTitleStr{}
-				x.Url = urls[threads*quotient+k]
+				x.URL = urls[threads*quotient+k]
 				x.Title = newTitle
 				newTitleData.Results = append(newTitleData.Results, x)
 			}
 			if newTitle == "" {
 				x := urlTitleStr{}
-				x.Url = urls[threads*quotient+k]
+				x.URL = urls[threads*quotient+k]
 				x.Title = "Title not found"
 				newTitleData.Results = append(newTitleData.Results, x)
 			}

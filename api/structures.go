@@ -17,7 +17,7 @@ type titleDataStr struct {
 }
 
 type urlTitleStr struct {
-	Url   string
+	URL   string
 	Title string
 }
 
