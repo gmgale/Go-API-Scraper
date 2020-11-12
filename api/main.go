@@ -25,7 +25,7 @@ var db *sql.DB
 
 func main() {
 	var flagPort string
-	flag.StringVar(&flagPort, "port", "8080", "Port for server setup.")
+	flag.StringVar(&flagPort, "port", "8081", "Port for server setup.")
 	var host string
 	flag.StringVar(&host, "host", "db", "Host to connect to.")
 	flag.Parse()
