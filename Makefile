@@ -25,6 +25,7 @@ docker-new:
 	docker-compose up --build --force-recreate
 # Build and run the API on the localhost server (localhost flag)
 local-run:
-	api/goapiscraper -host localhost
+	api/goapiscraper.exe -host localhost
+
 	
 	

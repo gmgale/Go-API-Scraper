@@ -37,7 +37,7 @@ func dbConnect(host string) {
 	for i := 5; i >= 0; i-- {
 		err = db.Ping()
 		if err != nil {
-			fmt.Printf("Error pinging database %v. Tries remaining: %d\n", err, i)
+			fmt.Printf("Error pinging database '%v' on host '%v', port '%v'. \n%v Tries remaining: %d\n", dbname, host, port, err, i)
 			time.Sleep(5)
 		}
 		if err == nil {
