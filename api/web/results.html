@@ -1,19 +1,20 @@
+{{ define "results" }}
+
 <!DOCTYPE html>
 <html lang="en">
     <head>
         <title>Results</title>
         <meta name="description" content="A history of web calls" />
         <meta name="keywords" content="database webscraping golang" />
-        <meta http-equiv="content-type" content="text/html; charset=windows-1252" />
         <link rel="stylesheet" type="text/css" href="style/style.css" />
       </head>
-</html>
+
 <body>
   <h1>Results</h1>
   <ul>
-    {{range .localDb}}
-        <li>Time: {{.Time}}</li>
-        <li>Threads: {{.Threads}}</li>
+    {{range .DBlocal}}
+        <li>Time: {{.DBlocal}}</li>
+        <li>Threads: {{.DBlocal.Threads}}</li>
         <li>URL: {{.Results.URL}}</li>
         <li>Title: {{.Results.title}}</li>
         <li>Succeeded Calls: {{.Status.Succeeded}}</li>
@@ -22,3 +23,5 @@
     {{end}}
 </ul>
 </body>
+</html>
+{{ end }}
