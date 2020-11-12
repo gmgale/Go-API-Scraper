@@ -32,6 +32,7 @@ func newServer(port string) *myServer {
 	router.HandleFunc("/", topLevel)
 	router.HandleFunc("/webcall/{Id=threads}", getThreads)
 	router.HandleFunc("/results", dispResults)
+	router.HandleFunc("/results-visual", dispResultsVisual)
 	router.HandleFunc("/shutdown", s.shutdownHandler)
 
 	http.Handle("/", router)
