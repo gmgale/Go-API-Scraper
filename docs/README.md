@@ -11,6 +11,6 @@ It then extracts a short title text from each page and save this text in a commo
 
 The service then displays the number of successful calls, the number of failed calls and the saved titles from all web pages.
 
-Requests can be sent in the form of a http GET to localhost:8080/api/ to the API via port 8080.
+Requests can be sent in the form of a http GET to localhost:8080/.
 
-A wecome screen can be found at localhost:8080/api.
+A wecome screen can be found at localhost:8080/
