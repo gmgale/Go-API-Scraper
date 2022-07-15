@@ -1,4 +1,5 @@
-![Go logo](https://golang.org/lib/godoc/images/go-logo-blue.svg)
+![Go logo](img.png)
+
 
 # GoApiScraper
 ### A web-scraping REST API that makes use of Go's concurrency functionality for parralel GET requests.
